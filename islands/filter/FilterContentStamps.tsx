@@ -996,6 +996,7 @@ export const FilterContentStamps = ({
               toggleMarketType(value as "listings" | "sales")}
             mode="single"
             size="xsR"
+            color="primary"
             spacing="evenFullwidth"
           />
         </div>
@@ -1032,7 +1033,7 @@ export const FilterContentStamps = ({
                 spacing="evenFullwidth"
                 disabledOptions={["atomics"]}
                 alwaysSelectedOptions={["dispensers"]}
-                color="grey"
+                color="primary"
               />
             </div>
 
@@ -1124,7 +1125,7 @@ export const FilterContentStamps = ({
                 spacing="evenFullwidth"
                 disabledOptions={["atomics"]}
                 alwaysSelectedOptions={["dispensers"]}
-                color="grey"
+                color="primary"
               />
             </div>
 
