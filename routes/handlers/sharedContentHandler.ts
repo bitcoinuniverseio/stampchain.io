@@ -127,9 +127,8 @@ export async function handleContentRequest(
       headers.set("Vary", "Accept-Encoding");
       headers.set("X-Frame-Options", "SAMEORIGIN");
       headers.set("X-Content-Type-Options", "nosniff");
-      return new Response(body, {
-        status: response.status,
-        headers,
+      return WebResponseUtil.modifiedResponse(body, response, {
+        headers: Object.fromEntries(headers.entries()),
       });
     }
 
