@@ -116,6 +116,23 @@ describe("MemoryMonitorService", () => {
       assert(typeof health.metrics.leakDetected === "boolean");
     });
 
+    it("should cap reported memory usage at 100 percent", () => {
+      const stats = memoryMonitor.getMemoryStats();
+      const originalHeapLimit = stats.limits.heapLimit;
+
+      try {
+        memoryMonitor.setMemoryLimits({
+          heapLimit: Math.max(1, Math.floor(stats.usage.current.rss / 2)),
+        });
+
+        const health = memoryMonitor.getHealthStatus();
+        assertEquals(health.metrics.memoryUsagePercent, 100);
+        assertEquals(health.status, "critical");
+      } finally {
+        memoryMonitor.setMemoryLimits({ heapLimit: originalHeapLimit });
+      }
+    });
+
     it("should calculate memory pressure correctly", () => {
       const stats = memoryMonitor.getMemoryStats();
       const health = memoryMonitor.getHealthStatus();
