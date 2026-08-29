@@ -1,6 +1,6 @@
 # Task 7.7 CI Validation Report
 
-**Task**: CI validation — run full Newman suite, fix newly-caught failures, create PR
+**Task**: CI validation, run full Newman suite, fix newly-caught failures, create PR
 **Tag**: btcstampsexplorer
 **Date**: 2026-02-15
 **Status**: COMPLETED ✅
