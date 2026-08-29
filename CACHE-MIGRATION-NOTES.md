@@ -8,7 +8,7 @@ infrastructure recommendations for post-deploy operations.
 All `"never"` TTL values in `handleCache` / `setCachedData` call sites have been replaced
 with explicit numeric durations. The `"never"` literal is retained in the codebase only as
 a valid type (`number | "never"`) and in internal conditional logic inside `setCachedData`
-itself — no live call site passes `"never"` as a TTL argument.
+itself, no live call site passes `"never"` as a TTL argument.
 
 ## Verification Status
 
@@ -22,7 +22,7 @@ grep -rn '"never"' stampchain.io/routes/ stampchain.io/server/ \
 ```
 
 Only matches remaining are the two implementation lines inside `databaseManager.ts`
-that handle the `"never"` sentinel as a conditional branch — this is correct.
+that handle the `"never"` sentinel as a conditional branch, this is correct.
 
 ## TTL Values Applied
 
@@ -74,7 +74,7 @@ completes, use the following procedure as a last resort:
 redis-cli FLUSHDB
 ```
 
-This clears **all** keys from the current database and causes a cache cold start — all
+This clears **all** keys from the current database and causes a cache cold start, all
 requests will hit the database until the cache warms up. Use only when the service is
 otherwise unusable due to memory exhaustion.
 
