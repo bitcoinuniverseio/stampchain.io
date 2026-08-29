@@ -1,4 +1,5 @@
 import { Handlers } from "$fresh/server.ts";
+import { WebResponseUtil } from "$lib/utils/api/responses/webResponseUtil.ts";
 
 const SITE_URL = "https://stampchain.io";
 
@@ -58,9 +59,8 @@ ${urls}
 export const handler: Handlers = {
   GET(_req, _ctx) {
     const xml = generateSitemapXml();
-    return new Response(xml, {
+    return WebResponseUtil.stampResponse(xml, "application/xml", {
       headers: {
-        "Content-Type": "application/xml; charset=utf-8",
         "Cache-Control": "public, max-age=3600",
       },
     });
