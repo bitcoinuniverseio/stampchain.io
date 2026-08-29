@@ -317,19 +317,22 @@ export class MemoryMonitorService {
     const current = this.getCurrentMemoryUsage();
     const pressure = this.calculateMemoryPressure(current);
     const leakDetected = this.detectMemoryLeak();
-    const usagePercent = Math.round((current.rss / this.memoryLimits.heapLimit) * 100);
+    const rawUsagePercent = Math.round(
+      (current.rss / this.memoryLimits.heapLimit) * 100,
+    );
+    const usagePercent = Math.min(100, Math.max(0, rawUsagePercent));
 
     let status: "healthy" | "warning" | "critical" = "healthy";
     let message = "Memory usage is within normal limits";
 
-    if (pressure === "critical" || usagePercent >= 85) {
+    if (pressure === "critical" || rawUsagePercent >= 85) {
       status = "critical";
-      message = `Critical memory usage: ${usagePercent}%`;
-    } else if (pressure === "high" || usagePercent >= 70 || leakDetected) {
+      message = `Critical memory usage: ${rawUsagePercent}%`;
+    } else if (pressure === "high" || rawUsagePercent >= 70 || leakDetected) {
       status = "warning";
       message = leakDetected
-        ? `Memory leak detected, usage: ${usagePercent}%`
-        : `High memory usage: ${usagePercent}%`;
+        ? `Memory leak detected, usage: ${rawUsagePercent}%`
+        : `High memory usage: ${rawUsagePercent}%`;
     }
 
     return {
