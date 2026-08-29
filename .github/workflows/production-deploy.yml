@@ -38,6 +38,7 @@ env:
 jobs:
   # Gate: ensure production-validation passed on this commit
   pre-check:
+    if: github.repository == 'stampchain-io/stampchain.io'
     name: Pre-Deploy Checks
     runs-on: ubuntu-latest
     outputs:
@@ -69,6 +70,7 @@ jobs:
           echo "| Dry Run | ${DRY_RUN} |" >> $GITHUB_STEP_SUMMARY
 
   build:
+    if: github.repository == 'stampchain-io/stampchain.io'
     name: Build via CodeBuild
     runs-on: ubuntu-latest
     needs: pre-check
@@ -202,6 +204,7 @@ jobs:
           echo "Would push to ECR: ${{ env.ECR_REPO }}:latest" >> $GITHUB_STEP_SUMMARY
 
   deploy:
+    if: github.repository == 'stampchain-io/stampchain.io'
     name: Deploy to ECS
     runs-on: ubuntu-latest
     needs: [pre-check, build]
@@ -430,6 +433,7 @@ jobs:
           echo "Previous task def: ${{ steps.snapshot.outputs.previous_arn }}" >> $GITHUB_STEP_SUMMARY
 
   validate:
+    if: github.repository == 'stampchain-io/stampchain.io'
     name: Post-Deploy Validation
     runs-on: ubuntu-latest
     needs: [pre-check, deploy]
@@ -510,6 +514,7 @@ jobs:
           echo "| Health | ${{ env.PROD_URL }}/api/v2/health |" >> $GITHUB_STEP_SUMMARY
 
   rollback:
+    if: github.repository == 'stampchain-io/stampchain.io'
     name: Rollback on Failure
     runs-on: ubuntu-latest
     needs: [pre-check, deploy, validate]
@@ -558,6 +563,7 @@ jobs:
           echo "**Action required:** Investigate the failure before re-deploying." >> $GITHUB_STEP_SUMMARY
 
   notify:
+    if: github.repository == 'stampchain-io/stampchain.io'
     name: Deployment Notification
     runs-on: ubuntu-latest
     needs: [pre-check, build, deploy, validate]
