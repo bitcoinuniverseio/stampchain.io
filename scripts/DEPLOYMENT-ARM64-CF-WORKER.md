@@ -225,7 +225,7 @@ This is a separate PR. Changes:
 If issues arise after Chromium removal:
 1. Revert Dockerfile to include Chromium
 2. Re-register ECS task definition with 2048MB memory
-3. Trigger rebuild — local Chrome fallback automatically re-enables
+3. Trigger rebuild, local Chrome fallback automatically re-enables
 
 ---
 

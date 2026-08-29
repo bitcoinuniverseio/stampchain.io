@@ -141,7 +141,7 @@ The app UI is inspired by Apple design principles, with dark themed multilayered
 
 - **MetaTags.tsx**: SEO and meta information management
   - **Purpose**: Manages page metadata, OpenGraph tags, and social media cards
-  - **Key Features**: Essential meta tags, OpenGraph tags, Twitter Card support, conditional rendering, canonical URL management
+  - **Key Features**: Essential meta tags, OpenGraph tags, Twitter Card support, conditional rendering, authoritative URL management
   - **Props**: `title`, `description`, `image`, `skipImage`, `skipTitle`, `skipDescription`, `skipOgMeta`
 
 - **types.ts**: Layout type definitions and constants
