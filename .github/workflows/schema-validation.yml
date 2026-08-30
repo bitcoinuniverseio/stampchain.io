@@ -20,7 +20,7 @@ jobs:
   # CRITICAL: Schema validation prevents API breaking changes
   api-schema-validation:
     name: API Schema Validation
-    runs-on: ubuntu-latest
+    runs-on: runs-on=${{ github.run_id }}-api_schema_validation/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 25
     permissions:
       contents: read

@@ -15,7 +15,7 @@ on:
 jobs:
   type-check:
     name: TypeScript Type Analysis
-    runs-on: ubuntu-latest
+    runs-on: runs-on=${{ github.run_id }}-type_check/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 10
 
     steps:
