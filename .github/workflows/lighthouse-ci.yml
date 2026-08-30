@@ -17,7 +17,7 @@ on:
 jobs:
   lighthouse-ci:
     name: Lighthouse CI Performance Testing
-    runs-on: ubuntu-latest
+    runs-on: runs-on=${{ github.run_id }}-lighthouse_ci/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 30
 
     services:
