@@ -22,13 +22,13 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # Setup Node.js (no cache due to gitignored package-lock.json)
       - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
       # Manual npm cache based on package.json (since package-lock.json is gitignored)
       - name: Cache npm dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package.json') }}
@@ -53,7 +53,7 @@ jobs:
           deno-version: v2.6.9
 
       - name: Cache Deno dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ~/.deno

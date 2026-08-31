@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: runs-on/action@v2
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
@@ -39,7 +39,7 @@ jobs:
           deno-version: ${{ env.DENO_VERSION }}
 
       - name: Cache Deno dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/deno
           key: deno-${{ hashFiles('deno.json', 'deno.lock') }}
@@ -70,7 +70,7 @@ jobs:
     steps:
       - uses: runs-on/action@v2
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
@@ -78,7 +78,7 @@ jobs:
           deno-version: ${{ env.DENO_VERSION }}
 
       - name: Cache Deno dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/deno
           key: deno-${{ hashFiles('deno.json', 'deno.lock') }}
@@ -144,7 +144,7 @@ jobs:
     steps:
       - uses: runs-on/action@v2
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
@@ -152,7 +152,7 @@ jobs:
           deno-version: ${{ env.DENO_VERSION }}
 
       - name: Cache Deno dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/deno
           key: deno-cross-module-${{ hashFiles('deno.json', 'deno.lock') }}
@@ -188,7 +188,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
@@ -254,7 +254,7 @@ jobs:
     steps:
       - uses: runs-on/action@v2
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
@@ -310,7 +310,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
@@ -357,7 +357,7 @@ jobs:
     steps:
       - uses: runs-on/action@v2
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
