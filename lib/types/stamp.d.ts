@@ -609,6 +609,7 @@ export interface StampRow {
   stamp_hash: string;
   file_hash: string;
   file_size_bytes: number | null;
+  encoding_method?: "MULTISIG" | "OLGA" | null;
 
   // Market data (optional)
   floorPrice?: number | "priceless";
@@ -633,6 +634,8 @@ export interface StampRow {
   is_btc_stamp?: number | null;
   is_reissue?: number | null;
   is_valid_base64?: number | null;
+  transaction_fee_sats?: number | null;
+  transaction_fee_rate_sat_vb?: number | null;
 }
 
 /**

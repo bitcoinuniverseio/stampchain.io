@@ -701,7 +701,7 @@ Deno.test("StampController.getStampDetailsById calls getStamps with correct para
       "A123456789012345678901234567890123456789",
     );
     assertEquals(capturedParams.type, "all");
-    assertEquals(capturedParams.allColumns, false);
+    assertEquals(capturedParams.allColumns, true);
     assertEquals(capturedParams.noPagination, true);
     assertEquals(capturedParams.skipTotalCount, true);
     assertEquals(capturedParams.enrichWithAssetInfo, true);
