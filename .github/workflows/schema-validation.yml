@@ -2,7 +2,7 @@ name: API Schema Validation
 
 on:
   pull_request:
-    branches: [main, dev]
+    branches: [main, dev, develop]
     paths:
       - 'routes/api/**'
       - 'server/**'
@@ -20,7 +20,7 @@ jobs:
   # CRITICAL: Schema validation prevents API breaking changes
   api-schema-validation:
     name: API Schema Validation
-    runs-on: ubuntu-latest
+    runs-on: runs-on=${{ github.run_id }}-api_schema_validation/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 25
     permissions:
       contents: read
@@ -28,19 +28,16 @@ jobs:
       issues: write
 
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: Setup Node.js (for Newman)
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
+      - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
       - name: Install Newman
         run: npm install -g newman
 

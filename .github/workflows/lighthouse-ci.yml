@@ -2,7 +2,7 @@ name: Lighthouse CI
 
 on:
   pull_request:
-    branches: [main, dev]
+    branches: [main, dev, develop]
     paths:
       - 'client/**'
       - 'routes/**'
@@ -17,7 +17,7 @@ on:
 jobs:
   lighthouse-ci:
     name: Lighthouse CI Performance Testing
-    runs-on: ubuntu-latest
+    runs-on: runs-on=${{ github.run_id }}-lighthouse_ci/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 30
 
     services:
@@ -65,24 +65,21 @@ jobs:
       LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.6.9
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24.19.0'
-
+      - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
       - name: Install LHCI
         run: npm install -g @lhci/cli@0.14.x
 
       - name: Cache Deno dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ~/.deno

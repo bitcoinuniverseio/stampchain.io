@@ -8,16 +8,17 @@ on:
     branches:
       - main
       - dev
+      - develop
 
 jobs:
   docker-build-test:
     # Only run if the Code Quality workflow succeeded
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest
-    
+    runs-on: runs-on=${{ github.run_id }}-docker_build_test/runner=universe-hosted/cpu=2+8/env=production
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
