@@ -43,7 +43,7 @@ on:
 jobs:
   newman-comprehensive:
     name: Newman Integration Tests (Database Required)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, universe-ci]
     timeout-minutes: 30
     
     permissions:
@@ -63,11 +63,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24.19.0'
-
+      - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
       - name: Cache npm dependencies
         uses: actions/cache@v5
         with:
@@ -494,7 +490,7 @@ jobs:
 
   pagination-validation:
     name: Pagination & Data Validation Tests
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, universe-ci]
     timeout-minutes: 20
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     
@@ -502,11 +498,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24.19.0'
-
+      - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
       - name: Install Newman
         run: |
           npm install -g newman newman-reporter-html newman-reporter-json
@@ -537,7 +529,7 @@ jobs:
 
   performance-benchmark:
     name: API Performance Benchmarking
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, universe-ci]
     timeout-minutes: 20
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     
@@ -592,7 +584,7 @@ jobs:
 
   newman-local-dev:
     name: Newman Tests - Local Dev Server
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, universe-ci]
     timeout-minutes: 20
     if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
 
@@ -658,11 +650,7 @@ jobs:
         with:
           deno-version: v2.6.9
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24.19.0'
-
+      - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
       - name: Cache Deno dependencies
         uses: actions/cache@v5
         with:
@@ -1032,7 +1020,7 @@ jobs:
 
   schema-contract-tests:
     name: Schema Contract Tests - Production Monitor
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, universe-ci]
     timeout-minutes: 10
     # Production monitoring only — schema contracts are validated against local dev
     # in the newman-local-dev job. This job monitors production for regressions.
@@ -1047,11 +1035,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24.19.0'
-
+      - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
       - name: Verify schema contract test collection exists
         run: |
           echo "Verifying schema-contract-tests.json exists..."
