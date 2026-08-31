@@ -11,7 +11,7 @@ on:
 
 jobs:
   validate-schema:
-    runs-on: [self-hosted, universe-ci]
+    runs-on: runs-on=${{ github.run_id }}-validate_schema/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 5
     
     steps:
