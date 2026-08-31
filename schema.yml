@@ -3181,6 +3181,23 @@ components:
           type: integer
           nullable: true
           description: "Size of the decoded stamp file in bytes"
+        encoding_method:
+          type: string
+          nullable: true
+          enum: [MULTISIG, OLGA]
+          description: "Encoding method recorded by the Stamps indexer"
+        src_data:
+          type: object
+          nullable: true
+          description: "Indexed protocol payload for SRC-721 and other subprotocol stamps"
+        transaction_fee_sats:
+          type: integer
+          nullable: true
+          description: "Miner fee paid by the stamp transaction in satoshis"
+        transaction_fee_rate_sat_vb:
+          type: number
+          nullable: true
+          description: "Stamp transaction fee rate in satoshis per virtual byte"
         floorPrice:
           type: number
           nullable: true
@@ -3264,6 +3281,11 @@ components:
           type: string
         file_hash:
           type: string
+        encoding_method:
+          type: string
+          nullable: true
+          enum: [MULTISIG, OLGA]
+          description: "Encoding method recorded by the Stamps indexer"
         # NOTE: Root-level price fields removed in v2.3 - use marketData.floorPriceBTC instead
         # floorPrice, floorPriceUSD, marketCapUSD are available in v2.2 only
     BlockStampRow:
