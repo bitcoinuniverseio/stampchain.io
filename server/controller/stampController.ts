@@ -407,7 +407,7 @@ export class StampController {
       identifier: id,
       type: stampType,
       cacheType,
-      allColumns: false,
+      allColumns: true,
       noPagination: true,
       skipTotalCount: true,
       enrichWithAssetInfo: true,
