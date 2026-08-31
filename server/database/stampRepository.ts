@@ -904,7 +904,8 @@ export class StampRepository {
       st.ident,
       st.stamp_hash,
       st.file_hash,
-      st.file_size_bytes
+      st.file_size_bytes,
+      st.encoding_method
     `;
 
     const secondaryColumns = `
@@ -918,7 +919,9 @@ export class StampRepository {
       st.src_data,
       st.is_btc_stamp,
       st.is_reissue,
-      st.is_valid_base64
+      st.is_valid_base64,
+      (SELECT tx.fee FROM transactions AS tx WHERE tx.tx_hash = st.tx_hash LIMIT 1) AS transaction_fee_sats,
+      (SELECT tx.fee_rate_sat_vb FROM transactions AS tx WHERE tx.tx_hash = st.tx_hash LIMIT 1) AS transaction_fee_rate_sat_vb
     `;
 
     // Select either custom columns, or core+extended columns, or just core columns
