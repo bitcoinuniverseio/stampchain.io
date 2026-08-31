@@ -20,7 +20,7 @@ jobs:
   # CRITICAL: Schema validation prevents API breaking changes
   api-schema-validation:
     name: API Schema Validation
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, universe-ci]
     timeout-minutes: 25
     permissions:
       contents: read
@@ -36,11 +36,7 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: Setup Node.js (for Newman)
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
+      - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
       - name: Install Newman
         run: npm install -g newman
 

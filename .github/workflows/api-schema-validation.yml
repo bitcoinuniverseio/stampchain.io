@@ -11,17 +11,13 @@ on:
 
 jobs:
   validate-schema:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, universe-ci]
     timeout-minutes: 5
     
     steps:
       - uses: actions/checkout@v6
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24.19.0'
-          
+      - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
       - name: Validate OpenAPI Schema
         run: |
           echo "🔍 Validating OpenAPI specification..."
