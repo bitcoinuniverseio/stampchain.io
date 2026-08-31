@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS `StampTableV4` (
   `file_hash` varchar(255) DEFAULT NULL,
   `is_valid_base64` tinyint(1) DEFAULT NULL,
   `file_size_bytes` int DEFAULT NULL,
+  `encoding_method` ENUM('MULTISIG', 'OLGA') NULL,
   PRIMARY KEY (`stamp`),
   UNIQUE `tx_hash` (`tx_hash`),
   UNIQUE `stamp_hash` (`stamp_hash`),

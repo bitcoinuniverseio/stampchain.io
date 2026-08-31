@@ -609,7 +609,7 @@ export interface StampRow {
   stamp_hash: string;
   file_hash: string;
   file_size_bytes: number | null;
-  encoding_method: "MULTISIG" | "OLGA" | null;
+  encoding_method?: "MULTISIG" | "OLGA" | null;
 
   // Market data (optional)
   floorPrice?: number | "priceless";
