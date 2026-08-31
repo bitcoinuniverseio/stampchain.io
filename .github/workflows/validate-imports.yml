@@ -1,9 +1,9 @@
 name: Import Pattern Validation
 
-# Trigger on pull requests to main/dev branches
+# Trigger on pull requests to release branches.
 on:
   pull_request:
-    branches: [main, dev]
+    branches: [main, dev, develop]
     paths:
       - "**/*.ts"
       - "**/*.tsx"

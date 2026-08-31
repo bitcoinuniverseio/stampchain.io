@@ -2,9 +2,9 @@ name: Production Deployment Validation
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch:
     inputs:
       validation_level:

@@ -8,6 +8,7 @@ on:
     branches:
       - main
       - dev
+      - develop
 
 jobs:
   docker-build-test:
