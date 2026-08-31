@@ -2,7 +2,7 @@ name: Unit Tests with Fixtures
 
 on:
   pull_request:
-    branches: [main, dev]
+    branches: [main, dev, develop]
     paths:
       - "tests/unit/**"
       - "tests/fixtures/**"
