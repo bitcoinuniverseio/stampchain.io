@@ -2,7 +2,7 @@ name: API Schema Validation
 
 on:
   pull_request:
-    branches: [main, dev]
+    branches: [main, dev, develop]
     paths:
       - 'routes/api/**'
       - 'server/**'
@@ -20,7 +20,7 @@ jobs:
   # CRITICAL: Schema validation prevents API breaking changes
   api-schema-validation:
     name: API Schema Validation
-    runs-on: [self-hosted, universe-ci]
+    runs-on: runs-on=${{ github.run_id }}-api_schema_validation/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 25
     permissions:
       contents: read
@@ -28,8 +28,9 @@ jobs:
       issues: write
 
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
