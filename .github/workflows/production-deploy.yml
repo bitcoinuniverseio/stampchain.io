@@ -40,7 +40,7 @@ jobs:
   pre-check:
     if: github.repository == 'stampchain-io/stampchain.io'
     name: Pre-Deploy Checks
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, universe-ci]
     outputs:
       deploy_mode: ${{ steps.config.outputs.mode }}
       dry_run: ${{ steps.config.outputs.dry_run }}
@@ -71,7 +71,7 @@ jobs:
 
   build:
     name: Build via CodeBuild
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, universe-ci]
     needs: pre-check
     if: github.repository == 'stampchain-io/stampchain.io' && (needs.pre-check.outputs.deploy_mode == 'codebuild')
     timeout-minutes: 20
@@ -204,7 +204,7 @@ jobs:
 
   deploy:
     name: Deploy to ECS
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, universe-ci]
     needs: [pre-check, build]
     if: github.repository == 'stampchain-io/stampchain.io' && (always() && (needs.build.result == 'success' || needs.pre-check.outputs.deploy_mode == 'deploy-only'))
     timeout-minutes: 30
@@ -432,7 +432,7 @@ jobs:
 
   validate:
     name: Post-Deploy Validation
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, universe-ci]
     needs: [pre-check, deploy]
     if: github.repository == 'stampchain-io/stampchain.io' && (always() && needs.deploy.result == 'success' && needs.pre-check.outputs.dry_run != 'true')
     timeout-minutes: 5
@@ -512,7 +512,7 @@ jobs:
 
   rollback:
     name: Rollback on Failure
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, universe-ci]
     needs: [pre-check, deploy, validate]
     if: github.repository == 'stampchain-io/stampchain.io' && (failure() && needs.deploy.outputs.previous_task_def != '' && needs.pre-check.outputs.dry_run != 'true')
     timeout-minutes: 10
@@ -560,7 +560,7 @@ jobs:
 
   notify:
     name: Deployment Notification
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, universe-ci]
     needs: [pre-check, build, deploy, validate]
     if: github.repository == 'stampchain-io/stampchain.io' && (always() && needs.pre-check.outputs.dry_run != 'true')
 
