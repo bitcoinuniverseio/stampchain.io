@@ -87,6 +87,7 @@ jobs:
       FULL_ANALYSIS: ${{ github.event.inputs.full_analysis || 'false' }}
 
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v6
         with:
