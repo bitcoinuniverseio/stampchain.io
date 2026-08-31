@@ -15,10 +15,11 @@ on:
 jobs:
   type-check:
     name: TypeScript Type Analysis
-    runs-on: [self-hosted, universe-ci]
+    runs-on: runs-on=${{ github.run_id }}-type_check/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 10
 
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v6
         with:

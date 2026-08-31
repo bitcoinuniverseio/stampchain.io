@@ -30,10 +30,11 @@ permissions:
 jobs:
   validate-imports:
     name: Validate Import Patterns
-    runs-on: [self-hosted, universe-ci]
+    runs-on: runs-on=${{ github.run_id }}-validate_imports/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 10
 
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout Repository
         uses: actions/checkout@v6
         with:
@@ -286,10 +287,11 @@ jobs:
   monitor-compliance:
     name: Compliance Monitoring
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    runs-on: [self-hosted, universe-ci]
+    runs-on: runs-on=${{ github.run_id }}-monitor_compliance/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 10
 
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout Repository
         uses: actions/checkout@v6
 

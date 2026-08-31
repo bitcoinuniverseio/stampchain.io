@@ -17,7 +17,7 @@ on:
 jobs:
   lighthouse-ci:
     name: Lighthouse CI Performance Testing
-    runs-on: [self-hosted, universe-ci]
+    runs-on: runs-on=${{ github.run_id }}-lighthouse_ci/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 30
 
     services:
@@ -65,6 +65,7 @@ jobs:
       LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v6
 

@@ -43,7 +43,7 @@ on:
 jobs:
   newman-comprehensive:
     name: Newman Integration Tests (Database Required)
-    runs-on: [self-hosted, universe-ci]
+    runs-on: runs-on=${{ github.run_id }}-newman_comprehensive/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 30
     
     permissions:
@@ -60,6 +60,7 @@ jobs:
       PERPLEXITY_API_KEY: test-perplexity-key
 
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v6
 
@@ -490,11 +491,12 @@ jobs:
 
   pagination-validation:
     name: Pagination & Data Validation Tests
-    runs-on: [self-hosted, universe-ci]
+    runs-on: runs-on=${{ github.run_id }}-pagination_validation/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 20
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v6
 
@@ -529,11 +531,12 @@ jobs:
 
   performance-benchmark:
     name: API Performance Benchmarking
-    runs-on: [self-hosted, universe-ci]
+    runs-on: runs-on=${{ github.run_id }}-performance_benchmark/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 20
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v6
 
@@ -584,7 +587,7 @@ jobs:
 
   newman-local-dev:
     name: Newman Tests - Local Dev Server
-    runs-on: [self-hosted, universe-ci]
+    runs-on: runs-on=${{ github.run_id }}-newman_local_dev/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 20
     if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
 
@@ -642,6 +645,7 @@ jobs:
       BLOCKSTREAM_API_URL: http://localhost:18443/blockstream/api
 
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v6
 
@@ -1020,7 +1024,7 @@ jobs:
 
   schema-contract-tests:
     name: Schema Contract Tests - Production Monitor
-    runs-on: [self-hosted, universe-ci]
+    runs-on: runs-on=${{ github.run_id }}-schema_contract_tests/runner=universe-hosted/cpu=2+8/env=production
     timeout-minutes: 10
     # Production monitoring only — schema contracts are validated against local dev
     # in the newman-local-dev job. This job monitors production for regressions.
@@ -1032,6 +1036,7 @@ jobs:
       issues: write
 
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v6
 
