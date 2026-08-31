@@ -28,7 +28,7 @@ jobs:
   # Skip weekend runs if configured
   check-schedule:
     name: Check Schedule
-    runs-on: ubuntu-latest
+    runs-on: runs-on=${{ github.run_id }}-check_schedule/runner=universe-hosted/cpu=2+8/env=production
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
       is_weekend: ${{ steps.check.outputs.is_weekend }}
@@ -63,7 +63,7 @@ jobs:
 
   daily-regression:
     name: Daily API Regression Testing
-    runs-on: ubuntu-latest
+    runs-on: runs-on=${{ github.run_id }}-daily_regression/runner=universe-hosted/cpu=2+8/env=production
     needs: check-schedule
     if: needs.check-schedule.outputs.should_run == 'true'
     timeout-minutes: 45
@@ -87,16 +87,13 @@ jobs:
       FULL_ANALYSIS: ${{ github.event.inputs.full_analysis || 'false' }}
 
     steps:
+      - uses: runs-on/action@v2
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0  # Fetch full history for trend analysis
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24.19.0'
-
+      - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
       - name: Install dependencies
         run: |
           npm install
@@ -395,13 +392,13 @@ jobs:
 
   cleanup-old-reports:
     name: Cleanup Old Reports
-    runs-on: ubuntu-latest
+    runs-on: runs-on=${{ github.run_id }}-cleanup_old_reports/runner=universe-hosted/cpu=2+8/env=production
     needs: [check-schedule, daily-regression]
     if: always() && needs.check-schedule.outputs.should_run == 'true'
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Cleanup old daily regression reports
         run: |
@@ -420,13 +417,13 @@ jobs:
 
   weekly-summary:
     name: Weekly Summary Report
-    runs-on: ubuntu-latest
+    runs-on: runs-on=${{ github.run_id }}-weekly_summary/runner=universe-hosted/cpu=2+8/env=production
     needs: check-schedule
     if: needs.check-schedule.outputs.day_of_week == '0' && needs.check-schedule.outputs.should_run == 'true'
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Generate weekly summary
         run: |
