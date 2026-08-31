@@ -62,11 +62,11 @@ jobs:
     steps:
       - uses: runs-on/action@v2
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
       - name: Cache npm dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-npm-newman-${{ hashFiles('**/package.json') }}
@@ -498,7 +498,7 @@ jobs:
     steps:
       - uses: runs-on/action@v2
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
       - name: Install Newman
@@ -538,7 +538,7 @@ jobs:
     steps:
       - uses: runs-on/action@v2
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Run performance benchmarks
         id: perf-test
@@ -647,7 +647,7 @@ jobs:
     steps:
       - uses: runs-on/action@v2
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
@@ -656,7 +656,7 @@ jobs:
 
       - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
       - name: Cache Deno dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ~/.deno
@@ -667,7 +667,7 @@ jobs:
             ${{ runner.os }}-deno-
 
       - name: Cache npm dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-npm-newman-${{ hashFiles('**/package.json') }}
@@ -1038,7 +1038,7 @@ jobs:
     steps:
       - uses: runs-on/action@v2
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
       - name: Verify schema contract test collection exists

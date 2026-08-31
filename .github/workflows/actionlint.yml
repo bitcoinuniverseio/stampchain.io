@@ -7,7 +7,7 @@ jobs:
   actionlint:
     runs-on: runs-on=${{ github.run_id }}-actionlint/runner=universe-hosted/cpu=2+8/env=production
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: reviewdog/action-actionlint@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
