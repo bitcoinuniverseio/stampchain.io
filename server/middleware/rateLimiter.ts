@@ -78,9 +78,8 @@ const rateLimitConfigs: Record<string, RateLimitConfig> = {
  * 3-5x higher than anonymous limits, no blocking on exceedance.
  * These will be used when X-API-Key header matches a registered key.
  *
- * NOTE: Currently unused — API key tier detection not yet implemented.
- * This config is defined now so the values are documented and ready
- * for the next PR that adds key signup + tier-aware middleware.
+ * Applied by getApiKeyRateLimitConfig() for free-tier keys. Partner-tier
+ * keys bypass rate limiting entirely; see the X-API-Key handling below.
  */
 const apiKeyRateLimitConfigs: Record<string, RateLimitConfig> = {
   "/api/v2/src20": {
