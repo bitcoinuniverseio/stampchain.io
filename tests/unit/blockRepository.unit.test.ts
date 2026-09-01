@@ -174,14 +174,12 @@ Deno.test("BlockRepository Unit Tests with DI", async (t) => {
       const cacheDurations: Array<number | "never"> = [];
       const database = {
         executeQueryWithCache(
-          query: string,
+          _query: string,
           _params: unknown[],
           cacheDuration: number | "never",
         ) {
           cacheDurations.push(cacheDuration);
-          return Promise.resolve({
-            rows: query.includes("COUNT(*)") ? [] : [],
-          });
+          return Promise.resolve({ rows: [] });
         },
       };
       BlockRepository.setDatabase(database as unknown as typeof dbManager);
