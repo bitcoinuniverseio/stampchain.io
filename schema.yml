@@ -39,12 +39,12 @@ tags:
     description: API key signup and usage endpoints
 externalDocs:
   description: Find out more about Stampchain
-  url: "http://stampchain.io"
+  url: "https://stampchain.io"
 servers:
   - url: "https://stampchain.io"
     description: Production server (uses live data)
   - url: "https://dev.stampchain.io"
-    description: Production server (uses live data)
+    description: Development server (not for production use)
 
 security:
   - ApiKeyAuth: []
@@ -2489,47 +2489,6 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
-        "500":
-          $ref: "#/components/responses/InternalServerError"
-
-  /api/v2/stamps/recent-sales:
-    get:
-      operationId: getRecentStampSales
-      tags:
-        - Stamps
-      summary: Get recent stamp sales with enhanced details
-      description: |
-        Retrieve recent stamp sales (dispenses) with enhanced transaction details and configurable time range.
-        This endpoint provides comprehensive information about stamp sales including transaction metadata,
-        block information, and optional full transaction details.
-      parameters:
-        - name: dayRange
-          in: query
-          description: Number of days to look back for sales (default 7, max 30)
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 30
-            default: 7
-          example: 7
-        - name: fullDetails
-          in: query
-          description: Include full transaction details in response
-          schema:
-            type: boolean
-            default: false
-          example: false
-        - $ref: "#/components/parameters/Limit"
-        - $ref: "#/components/parameters/Page"
-      responses:
-        "200":
-          description: Successful response with recent stamp sales
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/RecentStampSalesResponseBody"
-        "400":
-          $ref: "#/components/responses/BadRequest"
         "500":
           $ref: "#/components/responses/InternalServerError"
 
