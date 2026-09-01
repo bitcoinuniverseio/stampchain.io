@@ -11,17 +11,50 @@
 This is the official API and block explorer for
 [Bitcoin Stamps](https://stampchain.io/). It provides a comprehensive interface
 for exploring Bitcoin Stamps transactions and metadata, working in conjunction
-with the [Bitcoin Stamps Indexer](https://github.com/stampchain-io/btc_stamps).
+with the [Bitcoin Stamps Indexer](https://github.com/bitcoinuniverseio/btc_stamps).
 
-## Security
+## Documentation
 
-This is a Deno project. For security information including how npm development dependencies are handled, see [SECURITY.md](./SECURITY.md).
+**Start at [`docs/README.md`](docs/README.md), the documentation map for this repository.**
+
+| Document | Answers |
+|----------|---------|
+| [`docs/API.md`](docs/API.md) | How to call the API: versioning, API keys, rate limit tiers, error shapes, and which routes are public. |
+| [`schema.yml`](schema.yml) | The OpenAPI 3.0.3 contract itself. Browsable at [stampchain.io/docs](https://stampchain.io/docs). |
+| [`SUPPORT.md`](SUPPORT.md) | Where to take a question, including how to tell an API bug from an indexer bug. |
+| [`SECURITY.md`](SECURITY.md) | Reporting vulnerabilities, and how npm development dependencies are handled in this Deno project. |
+
+## What this is, and what it is not
+
+This service **reads** a MySQL database that the
+[Bitcoin Stamps indexer](https://github.com/bitcoinuniverseio/btc_stamps) writes. It does not
+connect to a Bitcoin node, does not parse transactions, and does not decide what counts as a
+stamp. Its database user is expected to be read-only.
+
+```
+Bitcoin node ──▶ btc_stamps indexer ──▶ MySQL ──▶ this service ──▶ REST API + explorer UI
+                        │                                ▲
+                        └── block/reorg webhook ──────────┘
+                            (/api/internal/bitcoinNotifications, invalidates caches)
+```
+
+Consequences worth knowing before you file an issue:
+
+- Questions about **why** a transaction became a stamp, which activation height applied, or why
+  an SRC-20 mint was credited at a reduced amount belong to the indexer. Its
+  [consensus reference](https://github.com/bitcoinuniverseio/btc_stamps/blob/main/docs/CONSENSUS.md)
+  answers them.
+- This service holds no consensus state. Restoring it means repointing it at a database, not
+  resyncing a chain.
+- `schema.yml` is enforced at runtime by `routes/api/_middleware.ts` on both the request and the
+  response. Changing an endpoint without changing the schema breaks the endpoint.
 
 ## Features
 
 - Full Bitcoin Stamps block explorer
-- API with OpenAPI/Swagger documentation
-- Support for SRC-20, SRC-721, and SRC-101 token standards
+- REST API described by an OpenAPI 3.0.3 contract, 55 paths across 13 tags
+- Support for classic Stamps, SRC-20, SRC-721, and SRC-101
+- Free API keys with higher rate limits, plus a partner tier
 
 ## Prerequisites
 
@@ -47,7 +80,7 @@ This is a Deno project. For security information including how npm development d
 
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/stampchain-io/stampchain.io.git
+   git clone https://github.com/bitcoinuniverseio/stampchain.io.git
    cd stampchain.io
    ```
 
@@ -75,8 +108,8 @@ deno task update
 deno task decode
 deno task decode_olga
 
-# Run schema validation
-deno task validate:schema
+# Validate the OpenAPI contract (redocly lint)
+npm run validate:schema
 ```
 
 ## Production Deployment
@@ -121,19 +154,29 @@ docker run -p 8000:8000 \
 ## API Documentation
 
 - OpenAPI/Swagger documentation available at `/docs`
-- Schema validation with `deno task validate:schema`
+- The contract is [`schema.yml`](schema.yml) at the repository root.
+  `static/swagger/openapi.yml` is a symlink to it for the bundled Swagger UI; point tooling at
+  `schema.yml`.
+- Validate it with `npm run validate:schema` (redocly lint against `.redocly.yaml`)
+- Guide to using the API: [`docs/API.md`](docs/API.md)
 
 ## Contributing
 
 1. Fork the repository
 2. Create your feature branch
 3. Run `deno task check` to ensure code quality
-4. Add tests for new features
-5. Submit a pull request
+4. If you touched an endpoint, update [`schema.yml`](schema.yml) in the same commit and run
+   `npm run validate:schema`
+5. Add tests for new features
+6. Submit a pull request
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full workflow and [`SUPPORT.md`](SUPPORT.md)
+for where to take questions.
 
 ## Additional Resources
 
-- [Bitcoin Stamps Indexer](https://github.com/stampchain-io/btc_stamps)
+- [Bitcoin Stamps Indexer](https://github.com/bitcoinuniverseio/btc_stamps)
+- [Indexer consensus reference](https://github.com/bitcoinuniverseio/btc_stamps/blob/main/docs/CONSENSUS.md)
 - [API Documentation](https://stampchain.io/docs)
 - [Discussion Board](https://github.com/orgs/stampchain-io/discussions)
 
