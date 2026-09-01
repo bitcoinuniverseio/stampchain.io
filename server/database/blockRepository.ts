@@ -1,6 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
 
-import { IMMUTABLE_CACHE_DURATION, STAMP_TABLE } from "$constants";
+import {
+  IMMUTABLE_CACHE_DURATION,
+  SHORT_CACHE_DURATION,
+  STAMP_TABLE,
+} from "$constants";
 import { dbManager } from "$server/database/databaseManager.ts";
 
 const BLOCK_FIELDS =
@@ -66,7 +70,7 @@ export class BlockRepository {
         LIMIT ?;
         `,
         [num],
-        IMMUTABLE_CACHE_DURATION, // Blocks are immutable once confirmed - cache forever
+        SHORT_CACHE_DURATION, // The rows are immutable, but the moving top-block window is not.
       ) || { rows: [] };
 
       const blocks = (result as any).rows;
