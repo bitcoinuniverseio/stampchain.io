@@ -4,7 +4,7 @@
   "name": "Stampchain explorer and API",
   "classification": "infrastructure",
   "repository": "bitcoinuniverseio/stampchain.io",
-  "documentationUrl": "https://docs.bitcoinuniverse.io/infrastructure/stampchain-io/",
+  "documentationUrl": "https://docs.bitcoinuniverse.io/developers/interfaces/",
   "docsRoot": "docs",
   "sourceRef": "dev",
   "lifecycle": "experimental",
