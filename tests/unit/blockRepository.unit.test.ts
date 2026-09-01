@@ -1,4 +1,5 @@
 import { assertEquals, assertExists } from "@std/assert";
+import { SHORT_CACHE_DURATION } from "$constants";
 import { BlockRepository } from "$server/database/blockRepository.ts";
 import { MockDatabaseManager } from "../mocks/mockDatabaseManager.ts";
 import { dbManager } from "$server/database/databaseManager.ts";
@@ -165,6 +166,33 @@ Deno.test("BlockRepository Unit Tests with DI", async (t) => {
 
     teardown();
   });
+
+  await t.step(
+    "getLastXBlocksFromDb - does not cache the moving block window as immutable",
+    async () => {
+      const original = (BlockRepository as any).db;
+      const cacheDurations: Array<number | "never"> = [];
+      const database = {
+        executeQueryWithCache(
+          _query: string,
+          _params: unknown[],
+          cacheDuration: number | "never",
+        ) {
+          cacheDurations.push(cacheDuration);
+          return Promise.resolve({ rows: [] });
+        },
+      };
+      BlockRepository.setDatabase(database as unknown as typeof dbManager);
+
+      try {
+        await BlockRepository.getLastXBlocksFromDb(4);
+        assertEquals(cacheDurations[0], SHORT_CACHE_DURATION);
+        assertEquals(cacheDurations[1], 60);
+      } finally {
+        BlockRepository.setDatabase(original);
+      }
+    },
+  );
 
   await t.step(
     "getRelatedBlocksWithStampsFromDb - by block index",
