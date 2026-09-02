@@ -42,10 +42,11 @@ on:
 
 jobs:
   route:
-    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    uses: ./.github/workflows/route.yml
     secrets: inherit
     with:
       plan: '{"newman_comprehensive":"docker","pagination_validation":"light","performance_benchmark":"docker","newman_local_dev":"light","schema_contract_tests":"docker"}'
+      config_ref: 1dd19289af21f4f6be01f874390a180b3af8bb38
 
   newman-comprehensive:
     needs: route

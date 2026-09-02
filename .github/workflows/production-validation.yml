@@ -23,10 +23,11 @@ env:
 
 jobs:
   route:
-    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    uses: ./.github/workflows/route.yml
     secrets: inherit
     with:
       plan: '{"production_gates":"standard","performance_benchmarking":"light","cross_module_integration":"light","dependency_health":"light","rollback_testing":"light","security_validation":"light","comprehensive_validation":"standard","notify_failure":"light"}'
+      config_ref: 1dd19289af21f4f6be01f874390a180b3af8bb38
 
   # Task 36 - Production Readiness Gates
   production-gates:
