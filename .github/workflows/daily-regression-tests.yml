@@ -25,10 +25,17 @@ on:
         type: boolean
 
 jobs:
+  route:
+    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    secrets: inherit
+    with:
+      plan: '{"check_schedule":"light","daily_regression":"docker","cleanup_old_reports":"light","weekly_summary":"light"}'
+
   # Skip weekend runs if configured
   check-schedule:
+    needs: route
     name: Check Schedule
-    runs-on: runs-on=${{ github.run_id }}-check_schedule/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).check_schedule }}
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
       is_weekend: ${{ steps.check.outputs.is_weekend }}
@@ -63,8 +70,8 @@ jobs:
 
   daily-regression:
     name: Daily API Regression Testing
-    runs-on: runs-on=${{ github.run_id }}-daily_regression/runner=universe-hosted/cpu=2+8/env=production
-    needs: check-schedule
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).daily_regression }}
+    needs: [route, check-schedule]
     if: needs.check-schedule.outputs.should_run == 'true'
     timeout-minutes: 45
     
@@ -392,8 +399,8 @@ jobs:
 
   cleanup-old-reports:
     name: Cleanup Old Reports
-    runs-on: runs-on=${{ github.run_id }}-cleanup_old_reports/runner=universe-hosted/cpu=2+8/env=production
-    needs: [check-schedule, daily-regression]
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).cleanup_old_reports }}
+    needs: [route, check-schedule, daily-regression]
     if: always() && needs.check-schedule.outputs.should_run == 'true'
     
     steps:
@@ -417,8 +424,8 @@ jobs:
 
   weekly-summary:
     name: Weekly Summary Report
-    runs-on: runs-on=${{ github.run_id }}-weekly_summary/runner=universe-hosted/cpu=2+8/env=production
-    needs: check-schedule
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).weekly_summary }}
+    needs: [route, check-schedule]
     if: needs.check-schedule.outputs.day_of_week == '0' && needs.check-schedule.outputs.should_run == 'true'
     
     steps:
