@@ -10,8 +10,15 @@ on:
       - '.redocly.yaml'
 
 jobs:
+  route:
+    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    secrets: inherit
+    with:
+      plan: '{"validate_schema":"light"}'
+
   validate-schema:
-    runs-on: runs-on=${{ github.run_id }}-validate_schema/runner=universe-hosted/cpu=2+8/env=production
+    needs: route
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).validate_schema }}
     timeout-minutes: 5
     
     steps:

@@ -4,8 +4,15 @@ on:
   pull_request:
 
 jobs:
+  route:
+    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    secrets: inherit
+    with:
+      plan: '{"actionlint":"light"}'
+
   actionlint:
-    runs-on: runs-on=${{ github.run_id }}-actionlint/runner=universe-hosted/cpu=2+8/env=production
+    needs: route
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).actionlint }}
     steps:
       - uses: actions/checkout@v7
       - uses: reviewdog/action-actionlint@v1

@@ -15,9 +15,16 @@ on:
     # Allow manual triggering for testing
 
 jobs:
+  route:
+    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    secrets: inherit
+    with:
+      plan: '{"lighthouse_ci":"light"}'
+
   lighthouse-ci:
+    needs: route
     name: Lighthouse CI Performance Testing
-    runs-on: runs-on=${{ github.run_id }}-lighthouse_ci/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).lighthouse_ci }}
     timeout-minutes: 30
 
     services:
