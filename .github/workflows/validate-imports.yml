@@ -28,9 +28,16 @@ permissions:
   checks: write
 
 jobs:
+  route:
+    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    secrets: inherit
+    with:
+      plan: '{"validate_imports":"light","monitor_compliance":"light"}'
+
   validate-imports:
+    needs: route
     name: Validate Import Patterns
-    runs-on: runs-on=${{ github.run_id }}-validate_imports/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).validate_imports }}
     timeout-minutes: 10
 
     steps:
@@ -285,9 +292,10 @@ jobs:
 
   # Optional: Run on schedule to monitor compliance drift
   monitor-compliance:
+    needs: route
     name: Compliance Monitoring
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    runs-on: runs-on=${{ github.run_id }}-monitor_compliance/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).monitor_compliance }}
     timeout-minutes: 10
 
     steps:

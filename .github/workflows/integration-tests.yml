@@ -28,9 +28,16 @@ on:
       - dev
 
 jobs:
+  route:
+    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    secrets: inherit
+    with:
+      plan: '{"integration_tests":"light"}'
+
   integration-tests:
+    needs: route
     name: Integration Tests
-    runs-on: runs-on=${{ github.run_id }}-integration_tests/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).integration_tests }}
     timeout-minutes: 20
     # Only run if unit tests passed (when triggered by workflow_run)
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}

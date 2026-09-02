@@ -13,9 +13,16 @@ on:
       - ".github/workflows/unit-tests.yml"
 
 jobs:
+  route:
+    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    secrets: inherit
+    with:
+      plan: '{"unit_tests":"light"}'
+
   unit-tests:
+    needs: route
     name: Unit Tests with Mock Database
-    runs-on: runs-on=${{ github.run_id }}-unit_tests/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).unit_tests }}
     timeout-minutes: 10
 
     env:
