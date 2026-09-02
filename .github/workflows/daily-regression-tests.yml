@@ -26,10 +26,11 @@ on:
 
 jobs:
   route:
-    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    uses: ./.github/workflows/route.yml
     secrets: inherit
     with:
       plan: '{"check_schedule":"light","daily_regression":"docker","cleanup_old_reports":"light","weekly_summary":"light"}'
+      config_ref: 1dd19289af21f4f6be01f874390a180b3af8bb38
 
   # Skip weekend runs if configured
   check-schedule:
