@@ -13,9 +13,16 @@ on:
   workflow_dispatch:
 
 jobs:
+  route:
+    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    secrets: inherit
+    with:
+      plan: '{"type_check":"light"}'
+
   type-check:
+    needs: route
     name: TypeScript Type Analysis
-    runs-on: runs-on=${{ github.run_id }}-type_check/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).type_check }}
     timeout-minutes: 10
 
     steps:
