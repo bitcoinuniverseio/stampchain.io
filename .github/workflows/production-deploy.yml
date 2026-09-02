@@ -37,10 +37,11 @@ env:
 
 jobs:
   route:
-    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    uses: ./.github/workflows/route.yml
     secrets: inherit
     with:
       plan: '{"pre_check":"light","build":"light","deploy":"light","validate":"light","rollback":"light","notify":"light"}'
+      config_ref: 1dd19289af21f4f6be01f874390a180b3af8bb38
 
   # Gate: ensure production-validation passed on this commit
   pre-check:
