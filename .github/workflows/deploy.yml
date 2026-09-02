@@ -5,9 +5,16 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
+  route:
+    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    secrets: inherit
+    with:
+      plan: '{"quality_checks":"light"}'
+
   quality-checks:
+    needs: route
     name: Quality Checks
-    runs-on: runs-on=${{ github.run_id }}-quality_checks/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).quality_checks }}
     timeout-minutes: 15 # Prevent hanging jobs
 
     permissions:

@@ -41,9 +41,16 @@ on:
     - cron: '0 2 * * *'
 
 jobs:
+  route:
+    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    secrets: inherit
+    with:
+      plan: '{"newman_comprehensive":"docker","pagination_validation":"light","performance_benchmark":"docker","newman_local_dev":"light","schema_contract_tests":"docker"}'
+
   newman-comprehensive:
+    needs: route
     name: Newman Integration Tests (Database Required)
-    runs-on: runs-on=${{ github.run_id }}-newman_comprehensive/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).newman_comprehensive }}
     timeout-minutes: 30
     
     permissions:
@@ -494,8 +501,9 @@ jobs:
           esac
 
   pagination-validation:
+    needs: route
     name: Pagination & Data Validation Tests
-    runs-on: runs-on=${{ github.run_id }}-pagination_validation/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).pagination_validation }}
     timeout-minutes: 20
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     
@@ -538,8 +546,9 @@ jobs:
           retention-days: 30
 
   performance-benchmark:
+    needs: route
     name: API Performance Benchmarking
-    runs-on: runs-on=${{ github.run_id }}-performance_benchmark/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).performance_benchmark }}
     timeout-minutes: 20
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     
@@ -594,8 +603,9 @@ jobs:
           echo "✅ Benchmark run complete"
 
   newman-local-dev:
+    needs: route
     name: Newman Tests - Local Dev Server
-    runs-on: runs-on=${{ github.run_id }}-newman_local_dev/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).newman_local_dev }}
     timeout-minutes: 20
     if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
 
@@ -1035,8 +1045,9 @@ jobs:
           echo "✅ Local dev test run complete"
 
   schema-contract-tests:
+    needs: route
     name: Schema Contract Tests - Production Monitor
-    runs-on: runs-on=${{ github.run_id }}-schema_contract_tests/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).schema_contract_tests }}
     timeout-minutes: 10
     # Production monitoring only — schema contracts are validated against local dev
     # in the newman-local-dev job. This job monitors production for regressions.

@@ -17,10 +17,17 @@ env:
   NODE_VERSION: "18"
 
 jobs:
+  route:
+    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    secrets: inherit
+    with:
+      plan: '{"api_schema_validation":"light"}'
+
   # CRITICAL: Schema validation prevents API breaking changes
   api-schema-validation:
+    needs: route
     name: API Schema Validation
-    runs-on: runs-on=${{ github.run_id }}-api_schema_validation/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).api_schema_validation }}
     timeout-minutes: 25
     permissions:
       contents: read
