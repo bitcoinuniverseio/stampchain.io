@@ -11,10 +11,17 @@ on:
       - develop
 
 jobs:
+  route:
+    uses: bitcoinuniverseio/.github-private/.github/workflows/route.yml@develop
+    secrets: inherit
+    with:
+      plan: '{"docker_build_test":"docker"}'
+
   docker-build-test:
+    needs: route
     # Only run if the Code Quality workflow succeeded
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: runs-on=${{ github.run_id }}-docker_build_test/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: ${{ fromJSON(needs.route.outputs.targets).docker_build_test }}
 
     steps:
       - name: Checkout code
