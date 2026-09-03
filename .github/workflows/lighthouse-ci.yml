@@ -17,7 +17,7 @@ on:
 jobs:
   lighthouse-ci:
     name: Lighthouse CI Performance Testing
-    runs-on: [self-hosted, linux, x64, universe-linux]
+    runs-on: [self-hosted, linux, x64, universe-super]
     timeout-minutes: 30
 
     services:
