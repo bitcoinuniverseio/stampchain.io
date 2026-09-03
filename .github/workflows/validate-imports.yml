@@ -34,7 +34,6 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout Repository
         uses: actions/checkout@v7
         with:
@@ -291,7 +290,6 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout Repository
         uses: actions/checkout@v7
 
