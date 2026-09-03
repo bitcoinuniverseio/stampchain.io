@@ -27,7 +27,7 @@ on:
 jobs:
   check-schedule:
     name: Check Schedule
-    runs-on: [self-hosted, linux, x64, universe-linux]
+    runs-on: [self-hosted, linux, x64, universe-super]
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
       is_weekend: ${{ steps.check.outputs.is_weekend }}
@@ -62,7 +62,7 @@ jobs:
 
   daily-regression:
     name: Daily API Regression Testing
-    runs-on: [self-hosted, linux, x64, universe-linux]
+    runs-on: [self-hosted, linux, x64, universe-super]
     needs: [check-schedule]
     if: needs.check-schedule.outputs.should_run == 'true'
     timeout-minutes: 45
@@ -394,7 +394,7 @@ jobs:
 
   cleanup-old-reports:
     name: Cleanup Old Reports
-    runs-on: [self-hosted, linux, x64, universe-linux]
+    runs-on: [self-hosted, linux, x64, universe-super]
     needs: [check-schedule, daily-regression]
     if: always() && needs.check-schedule.outputs.should_run == 'true'
     
@@ -419,7 +419,7 @@ jobs:
 
   weekly-summary:
     name: Weekly Summary Report
-    runs-on: [self-hosted, linux, x64, universe-linux]
+    runs-on: [self-hosted, linux, x64, universe-super]
     needs: [check-schedule]
     if: needs.check-schedule.outputs.day_of_week == '0' && needs.check-schedule.outputs.should_run == 'true'
     

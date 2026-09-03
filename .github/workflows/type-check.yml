@@ -15,7 +15,7 @@ on:
 jobs:
   type-check:
     name: TypeScript Type Analysis
-    runs-on: [self-hosted, linux, x64, universe-linux]
+    runs-on: [self-hosted, linux, x64, universe-super]
     timeout-minutes: 10
 
     steps:
