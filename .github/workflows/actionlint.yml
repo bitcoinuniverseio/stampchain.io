@@ -4,16 +4,8 @@ on:
   pull_request:
 
 jobs:
-  route:
-    uses: ./.github/workflows/route.yml
-    secrets: inherit
-    with:
-      plan: '{"actionlint":"light"}'
-      config_ref: 1dd19289af21f4f6be01f874390a180b3af8bb38
-
   actionlint:
-    needs: route
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).actionlint }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     steps:
       - uses: actions/checkout@v7
       - uses: reviewdog/action-actionlint@v1
