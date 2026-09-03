@@ -7,7 +7,7 @@ on:
 jobs:
   quality-checks:
     name: Quality Checks
-    runs-on: runs-on=${{ github.run_id }}-quality_checks/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 15 # Prevent hanging jobs
 
     permissions:
