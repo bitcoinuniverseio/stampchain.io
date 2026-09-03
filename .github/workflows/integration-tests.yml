@@ -31,7 +31,7 @@ on:
 jobs:
   integration-tests:
     name: Integration Tests
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-linux]
     timeout-minutes: 20
     # Only run if unit tests passed (when triggered by workflow_run)
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}

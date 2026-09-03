@@ -43,7 +43,7 @@ on:
 jobs:
   newman-comprehensive:
     name: Newman Integration Tests (Database Required)
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-linux]
     timeout-minutes: 30
     
     permissions:
@@ -490,7 +490,7 @@ jobs:
 
   pagination-validation:
     name: Pagination & Data Validation Tests
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-linux]
     timeout-minutes: 20
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     
@@ -529,7 +529,7 @@ jobs:
 
   performance-benchmark:
     name: API Performance Benchmarking
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-linux]
     timeout-minutes: 20
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     
@@ -584,7 +584,7 @@ jobs:
 
   newman-local-dev:
     name: Newman Tests - Local Dev Server
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-linux]
     timeout-minutes: 20
     if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
 
@@ -1020,7 +1020,7 @@ jobs:
 
   schema-contract-tests:
     name: Schema Contract Tests - Production Monitor
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-linux]
     timeout-minutes: 10
     # Production monitoring only — schema contracts are validated against local dev
     # in the newman-local-dev job. This job monitors production for regressions.
