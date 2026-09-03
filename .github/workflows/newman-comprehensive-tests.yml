@@ -60,7 +60,6 @@ jobs:
       PERPLEXITY_API_KEY: test-perplexity-key
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -496,7 +495,6 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -536,7 +534,6 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -645,7 +642,6 @@ jobs:
       BLOCKSTREAM_API_URL: http://localhost:18443/blockstream/api
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -1036,7 +1032,6 @@ jobs:
       issues: write
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v7
 
