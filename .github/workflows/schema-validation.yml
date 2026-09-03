@@ -20,7 +20,7 @@ jobs:
   # CRITICAL: Schema validation prevents API breaking changes
   api-schema-validation:
     name: API Schema Validation
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-linux]
     timeout-minutes: 25
     permissions:
       contents: read
