@@ -15,17 +15,9 @@ on:
     # Allow manual triggering for testing
 
 jobs:
-  route:
-    uses: ./.github/workflows/route.yml
-    secrets: inherit
-    with:
-      plan: '{"lighthouse_ci":"light"}'
-      config_ref: 1dd19289af21f4f6be01f874390a180b3af8bb38
-
   lighthouse-ci:
-    needs: route
     name: Lighthouse CI Performance Testing
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).lighthouse_ci }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 30
 
     services:
@@ -73,7 +65,6 @@ jobs:
       LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v6
 
