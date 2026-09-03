@@ -19,7 +19,6 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v7
         with:
