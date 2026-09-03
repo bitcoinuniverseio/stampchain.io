@@ -27,7 +27,6 @@ jobs:
       issues: write
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v6
 
