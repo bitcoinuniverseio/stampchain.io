@@ -15,7 +15,7 @@ on:
 jobs:
   unit-tests:
     name: Unit Tests with Mock Database
-    runs-on: runs-on=${{ github.run_id }}-unit_tests/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 10
 
     env:

@@ -5,7 +5,7 @@ on:
 
 jobs:
   actionlint:
-    runs-on: runs-on=${{ github.run_id }}-actionlint/runner=universe-hosted/cpu=2+8/env=production
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     steps:
       - uses: actions/checkout@v7
       - uses: reviewdog/action-actionlint@v1
