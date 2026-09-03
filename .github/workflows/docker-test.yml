@@ -13,7 +13,7 @@ jobs:
   docker-build-test:
     # Only run if the Code Quality workflow succeeded
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-medium]
+    runs-on: [self-hosted, linux, x64, universe-linux]
     
     steps:
       - name: Checkout code
