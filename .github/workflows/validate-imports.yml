@@ -30,7 +30,7 @@ permissions:
 jobs:
   validate-imports:
     name: Validate Import Patterns
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-linux]
     timeout-minutes: 10
 
     steps:
@@ -286,7 +286,7 @@ jobs:
   monitor-compliance:
     name: Compliance Monitoring
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-linux]
     timeout-minutes: 10
 
     steps:
