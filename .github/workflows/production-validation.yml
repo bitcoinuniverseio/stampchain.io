@@ -29,7 +29,6 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -68,7 +67,6 @@ jobs:
     needs: production-gates
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -142,7 +140,6 @@ jobs:
     continue-on-error: true
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -252,7 +249,6 @@ jobs:
       BLOCKSTREAM_API_URL: http://localhost:18443/blockstream/api
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -355,7 +351,6 @@ jobs:
       ]
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v7
 
