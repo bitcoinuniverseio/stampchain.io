@@ -22,18 +22,9 @@ env:
   NODE_VERSION: "18"
 
 jobs:
-  route:
-    uses: ./.github/workflows/route.yml
-    secrets: inherit
-    with:
-      plan: '{"production_gates":"light","performance_benchmarking":"light","cross_module_integration":"light","dependency_health":"light","rollback_testing":"light","security_validation":"light","comprehensive_validation":"light","notify_failure":"light"}'
-      config_ref: 1dd19289af21f4f6be01f874390a180b3af8bb38
-
-  # Task 36 - Production Readiness Gates
   production-gates:
-    needs: route
     name: Production Readiness Gates
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).production_gates }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 30
 
     steps:
@@ -71,9 +62,9 @@ jobs:
   # Task 36 - Performance Benchmarking
   performance-benchmarking:
     name: Performance Benchmarking
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).performance_benchmarking }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 45
-    needs: [route, production-gates]
+    needs: [production-gates]
 
     steps:
       - uses: runs-on/action@v2
@@ -144,9 +135,9 @@ jobs:
   # a full build environment not available in CI. Non-blocking until fixed.
   cross-module-integration:
     name: Cross-Module Integration Testing
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).cross_module_integration }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 60
-    needs: [route, production-gates]
+    needs: [production-gates]
     continue-on-error: true
 
     steps:
@@ -190,9 +181,8 @@ jobs:
 
   # Dependency Health Check
   dependency-health:
-    needs: route
     name: Dependency Health Check
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).dependency_health }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 20
 
     steps:
@@ -213,9 +203,8 @@ jobs:
 
   # Rollback Testing
   rollback-testing:
-    needs: route
     name: Rollback Procedure Testing
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).rollback_testing }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 25
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
 
@@ -314,9 +303,8 @@ jobs:
 
   # Security and Compliance
   security-validation:
-    needs: route
     name: Security Validation
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).security_validation }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 15
 
     steps:
@@ -352,7 +340,7 @@ jobs:
   # Comprehensive Validation (for main branch)
   comprehensive-validation:
     name: Comprehensive Validation
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).comprehensive_validation }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 90
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs:
@@ -414,7 +402,7 @@ jobs:
   # Notification on failure
   notify-failure:
     name: Notify on Failure
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).notify_failure }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     if: failure()
     needs:
       [

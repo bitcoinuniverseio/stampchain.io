@@ -17,18 +17,9 @@ env:
   NODE_VERSION: "18"
 
 jobs:
-  route:
-    uses: ./.github/workflows/route.yml
-    secrets: inherit
-    with:
-      plan: '{"api_schema_validation":"light"}'
-      config_ref: 1dd19289af21f4f6be01f874390a180b3af8bb38
-
-  # CRITICAL: Schema validation prevents API breaking changes
   api-schema-validation:
-    needs: route
     name: API Schema Validation
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).api_schema_validation }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 25
     permissions:
       contents: read

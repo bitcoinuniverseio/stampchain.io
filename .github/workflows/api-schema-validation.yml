@@ -10,16 +10,8 @@ on:
       - '.redocly.yaml'
 
 jobs:
-  route:
-    uses: ./.github/workflows/route.yml
-    secrets: inherit
-    with:
-      plan: '{"validate_schema":"light"}'
-      config_ref: 1dd19289af21f4f6be01f874390a180b3af8bb38
-
   validate-schema:
-    needs: route
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).validate_schema }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 5
     
     steps:
