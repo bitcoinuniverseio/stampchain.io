@@ -28,17 +28,9 @@ on:
       - dev
 
 jobs:
-  route:
-    uses: ./.github/workflows/route.yml
-    secrets: inherit
-    with:
-      plan: '{"integration_tests":"light"}'
-      config_ref: 1dd19289af21f4f6be01f874390a180b3af8bb38
-
   integration-tests:
-    needs: route
     name: Integration Tests
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).integration_tests }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 20
     # Only run if unit tests passed (when triggered by workflow_run)
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}

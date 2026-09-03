@@ -41,17 +41,9 @@ on:
     - cron: '0 2 * * *'
 
 jobs:
-  route:
-    uses: ./.github/workflows/route.yml
-    secrets: inherit
-    with:
-      plan: '{"newman_comprehensive":"docker","pagination_validation":"light","performance_benchmark":"docker","newman_local_dev":"light","schema_contract_tests":"docker"}'
-      config_ref: 1dd19289af21f4f6be01f874390a180b3af8bb38
-
   newman-comprehensive:
-    needs: route
     name: Newman Integration Tests (Database Required)
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).newman_comprehensive }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-medium]
     timeout-minutes: 30
     
     permissions:
@@ -502,9 +494,8 @@ jobs:
           esac
 
   pagination-validation:
-    needs: route
     name: Pagination & Data Validation Tests
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).pagination_validation }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 20
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     
@@ -547,9 +538,8 @@ jobs:
           retention-days: 30
 
   performance-benchmark:
-    needs: route
     name: API Performance Benchmarking
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).performance_benchmark }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-medium]
     timeout-minutes: 20
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     
@@ -604,9 +594,8 @@ jobs:
           echo "✅ Benchmark run complete"
 
   newman-local-dev:
-    needs: route
     name: Newman Tests - Local Dev Server
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).newman_local_dev }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 20
     if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
 
@@ -1046,9 +1035,8 @@ jobs:
           echo "✅ Local dev test run complete"
 
   schema-contract-tests:
-    needs: route
     name: Schema Contract Tests - Production Monitor
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).schema_contract_tests }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-medium]
     timeout-minutes: 10
     # Production monitoring only — schema contracts are validated against local dev
     # in the newman-local-dev job. This job monitors production for regressions.

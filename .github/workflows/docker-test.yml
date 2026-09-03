@@ -10,18 +10,10 @@ on:
       - dev
 
 jobs:
-  route:
-    uses: ./.github/workflows/route.yml
-    secrets: inherit
-    with:
-      plan: '{"docker_build_test":"docker"}'
-      config_ref: 1dd19289af21f4f6be01f874390a180b3af8bb38
-
   docker-build-test:
-    needs: route
     # Only run if the Code Quality workflow succeeded
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).docker_build_test }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-medium]
     
     steps:
       - name: Checkout code
