@@ -25,18 +25,9 @@ on:
         type: boolean
 
 jobs:
-  route:
-    uses: ./.github/workflows/route.yml
-    secrets: inherit
-    with:
-      plan: '{"check_schedule":"light","daily_regression":"docker","cleanup_old_reports":"light","weekly_summary":"light"}'
-      config_ref: 1dd19289af21f4f6be01f874390a180b3af8bb38
-
-  # Skip weekend runs if configured
   check-schedule:
-    needs: route
     name: Check Schedule
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).check_schedule }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
       is_weekend: ${{ steps.check.outputs.is_weekend }}
@@ -71,8 +62,8 @@ jobs:
 
   daily-regression:
     name: Daily API Regression Testing
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).daily_regression }}
-    needs: [route, check-schedule]
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-medium]
+    needs: [check-schedule]
     if: needs.check-schedule.outputs.should_run == 'true'
     timeout-minutes: 45
     
@@ -95,7 +86,6 @@ jobs:
       FULL_ANALYSIS: ${{ github.event.inputs.full_analysis || 'false' }}
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout code
         uses: actions/checkout@v6
         with:
@@ -404,8 +394,8 @@ jobs:
 
   cleanup-old-reports:
     name: Cleanup Old Reports
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).cleanup_old_reports }}
-    needs: [route, check-schedule, daily-regression]
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    needs: [check-schedule, daily-regression]
     if: always() && needs.check-schedule.outputs.should_run == 'true'
     
     steps:
@@ -429,8 +419,8 @@ jobs:
 
   weekly-summary:
     name: Weekly Summary Report
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).weekly_summary }}
-    needs: [route, check-schedule]
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    needs: [check-schedule]
     if: needs.check-schedule.outputs.day_of_week == '0' && needs.check-schedule.outputs.should_run == 'true'
     
     steps:

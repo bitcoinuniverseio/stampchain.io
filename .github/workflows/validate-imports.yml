@@ -28,21 +28,12 @@ permissions:
   checks: write
 
 jobs:
-  route:
-    uses: ./.github/workflows/route.yml
-    secrets: inherit
-    with:
-      plan: '{"validate_imports":"light","monitor_compliance":"light"}'
-      config_ref: 1dd19289af21f4f6be01f874390a180b3af8bb38
-
   validate-imports:
-    needs: route
     name: Validate Import Patterns
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).validate_imports }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 10
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout Repository
         uses: actions/checkout@v6
         with:
@@ -293,14 +284,12 @@ jobs:
 
   # Optional: Run on schedule to monitor compliance drift
   monitor-compliance:
-    needs: route
     name: Compliance Monitoring
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).monitor_compliance }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 10
 
     steps:
-      - uses: runs-on/action@v2
       - name: Checkout Repository
         uses: actions/checkout@v6
 

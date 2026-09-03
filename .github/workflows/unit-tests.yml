@@ -13,17 +13,9 @@ on:
       - ".github/workflows/unit-tests.yml"
 
 jobs:
-  route:
-    uses: ./.github/workflows/route.yml
-    secrets: inherit
-    with:
-      plan: '{"unit_tests":"light"}'
-      config_ref: 1dd19289af21f4f6be01f874390a180b3af8bb38
-
   unit-tests:
-    needs: route
     name: Unit Tests with Mock Database
-    runs-on: ${{ fromJSON(needs.route.outputs.targets).unit_tests }}
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     timeout-minutes: 10
 
     env:
