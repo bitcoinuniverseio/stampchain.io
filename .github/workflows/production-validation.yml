@@ -24,7 +24,7 @@ env:
 jobs:
   production-gates:
     name: Production Readiness Gates
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-medium]
+    runs-on: [self-hosted, linux, x64, universe-super]
     timeout-minutes: 30
 
     steps:
@@ -61,7 +61,7 @@ jobs:
   # Task 36 - Performance Benchmarking
   performance-benchmarking:
     name: Performance Benchmarking
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-super]
     timeout-minutes: 45
     needs: [production-gates]
 
@@ -133,7 +133,7 @@ jobs:
   # a full build environment not available in CI. Non-blocking until fixed.
   cross-module-integration:
     name: Cross-Module Integration Testing
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-super]
     timeout-minutes: 60
     needs: [production-gates]
     continue-on-error: true
@@ -179,7 +179,7 @@ jobs:
   # Dependency Health Check
   dependency-health:
     name: Dependency Health Check
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-super]
     timeout-minutes: 20
 
     steps:
@@ -201,7 +201,7 @@ jobs:
   # Rollback Testing
   rollback-testing:
     name: Rollback Procedure Testing
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-super]
     timeout-minutes: 25
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
 
@@ -300,7 +300,7 @@ jobs:
   # Security and Compliance
   security-validation:
     name: Security Validation
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-super]
     timeout-minutes: 15
 
     steps:
@@ -336,7 +336,7 @@ jobs:
   # Comprehensive Validation (for main branch)
   comprehensive-validation:
     name: Comprehensive Validation
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-medium]
+    runs-on: [self-hosted, linux, x64, universe-super]
     timeout-minutes: 90
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs:
@@ -397,7 +397,7 @@ jobs:
   # Notification on failure
   notify-failure:
     name: Notify on Failure
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-super]
     if: failure()
     needs:
       [

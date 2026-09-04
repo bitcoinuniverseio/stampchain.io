@@ -15,7 +15,7 @@ on:
 jobs:
   unit-tests:
     name: Unit Tests with Mock Database
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-super]
     timeout-minutes: 10
 
     env:
