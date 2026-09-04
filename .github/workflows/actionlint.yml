@@ -5,7 +5,7 @@ on:
 
 jobs:
   actionlint:
-    runs-on: [self-hosted, linux, x64, universe-linux]
+    runs-on: [self-hosted, linux, x64, universe-super]
     steps:
       - uses: actions/checkout@v7
       - uses: reviewdog/action-actionlint@v1
