@@ -30,19 +30,6 @@ jobs:
         with:
           deno-version: v2.6.9
 
-      - name: Cache Deno dependencies
-        uses: actions/cache@v6
-        with:
-          path: |
-            ~/.deno
-            ~/.cache/deno
-            .deno_cache
-          key: ${{ runner.os }}-deno-typecheck-${{ hashFiles('**/deno.json', '**/import_map.json', 'main.ts', 'dev.ts') }}
-          restore-keys: |
-            ${{ runner.os }}-deno-typecheck-${{ hashFiles('**/deno.json') }}
-            ${{ runner.os }}-deno-typecheck-
-            ${{ runner.os }}-deno-
-
       - name: Cache dependencies (if needed)
         if: github.event_name != 'pull_request'
         run: |

@@ -1,0 +1,15 @@
+# Self-hosted labels registered by the Universe runner fleet (PrimCast super and
+# PowerVPS ultra). Regenerate with:
+#   gh api orgs/bitcoinuniverseio/actions/runners --paginate -q '.runners[].labels[].name' | sort -u
+self-hosted-runner:
+  labels:
+    - universe-super
+    - primcast
+    - universe
+    - universe-ci
+    - universe-linux
+    - docker-ci
+    - docker-29-7-2
+    - linux-container-builder
+    - playwright-chromium
+    - browser-heavy

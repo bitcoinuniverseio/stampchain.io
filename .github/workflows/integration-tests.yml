@@ -43,7 +43,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: testpassword
           MYSQL_DATABASE: stamps_test
         ports:
-          - 3306:3306
+          - 3306
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -53,7 +53,7 @@ jobs:
       redis:
         image: redis:7-alpine
         ports:
-          - 6379:6379
+          - 6379
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -65,14 +65,11 @@ jobs:
       DENO_ENV: test
       # Database configuration for integration tests
       DB_HOST: 127.0.0.1
-      DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: testpassword
       DB_NAME: stamps_test
       DB_ENABLE_TLS: "false"
       # Redis configuration
-      REDIS_URL: redis://127.0.0.1:6379
-      ELASTICACHE_ENDPOINT: 127.0.0.1:6379
       SKIP_REDIS_CONNECTION: false
       # Mock API keys for testing
       QUICKNODE_API_KEY: test-quicknode-key
@@ -80,6 +77,15 @@ jobs:
       PERPLEXITY_API_KEY: test-perplexity-key
 
     steps:
+      - name: Resolve service container ports
+        # Services publish ephemeral host ports so concurrent jobs on a shared self-hosted host never collide.
+        run: |
+          {
+            echo "DB_PORT=${{ job.services.mysql.ports['3306'] }}"
+            echo "REDIS_PORT=${{ job.services.redis.ports['6379'] }}"
+            echo "REDIS_URL=redis://127.0.0.1:${{ job.services.redis.ports['6379'] }}"
+            echo "ELASTICACHE_ENDPOINT=127.0.0.1"
+          } >> "$GITHUB_ENV"
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -88,21 +94,11 @@ jobs:
         with:
           deno-version: v2.6.9
 
-      - name: Cache Deno dependencies
-        uses: actions/cache@v6
-        with:
-          path: |
-            ~/.deno
-            ~/.cache/deno
-          key: ${{ runner.os }}-deno-integration-${{ hashFiles('**/deno.json', '**/import_map.json') }}
-          restore-keys: |
-            ${{ runner.os }}-deno-integration-
-            ${{ runner.os }}-deno-
-
       - name: Wait for MySQL
         run: |
           echo "Waiting for MySQL to be ready..."
-          timeout 60 bash -c 'until mysqladmin ping -h 127.0.0.1 -P 3306 -u root -ptestpassword --silent; do
+          # shellcheck disable=SC2016 # the inner shell expands the exported variables
+          timeout 60 bash -c 'until mysqladmin ping -h 127.0.0.1 -P "$DB_PORT" -u root -ptestpassword --silent; do
             echo "MySQL not ready yet, waiting..."
             sleep 2
           done'
@@ -111,7 +107,7 @@ jobs:
       - name: Setup test database schema
         run: |
           echo "Setting up test database schema..."
-          mysql -h 127.0.0.1 -P 3306 -u root -ptestpassword stamps_test < scripts/test-schema.sql || echo "No schema file found, skipping..."
+          mysql -h 127.0.0.1 -P "$DB_PORT" -u root -ptestpassword stamps_test < scripts/test-schema.sql || echo "No schema file found, skipping..."
 
       - name: Install Redis CLI
         run: |
@@ -122,8 +118,8 @@ jobs:
       - name: Verify Redis Connection
         run: |
           echo "Verifying Redis connection..."
-          redis-cli -h 127.0.0.1 -p 6379 ping
-          redis-cli -h 127.0.0.1 -p 6379 info server | head -5
+          redis-cli -h 127.0.0.1 -p "$REDIS_PORT" ping
+          redis-cli -h 127.0.0.1 -p "$REDIS_PORT" info server | head -5
 
       - name: Cache dependencies
         run: |
@@ -137,7 +133,7 @@ jobs:
           TEST_DB_USER: root
           TEST_DB_PASSWORD: testpassword
           TEST_DB_NAME: stamps_test
-          TEST_DB_PORT: 3306
+          TEST_DB_PORT: ${{ job.services.mysql.ports['3306'] }}
           # Redis configuration
           TEST_REDIS_HOST: 127.0.0.1
           SKIP_REDIS_TLS: true
