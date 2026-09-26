@@ -28,6 +28,7 @@ import {
   calculateSocialMediaDimensions,
   calculateSvgDimensions,
   getOptimalConversionOptions,
+  svgNamespaceDeclarations,
 } from "$lib/utils/ui/rendering/svgUtils.ts";
 import { StampController } from "$server/controller/stampController.ts";
 import { dbManager } from "$server/database/databaseManager.ts";
@@ -654,7 +655,9 @@ async function renderSvgPreview(
     : `0 0 ${originalDimensions.width} ${originalDimensions.height}`;
 
   const wrappedSvg =
-    `<svg width="${targetWidth}" height="${targetHeight}" viewBox="0 0 ${targetWidth} ${targetHeight}" xmlns="http://www.w3.org/2000/svg">
+    `<svg width="${targetWidth}" height="${targetHeight}" viewBox="0 0 ${targetWidth} ${targetHeight}" xmlns="http://www.w3.org/2000/svg"${
+      svgNamespaceDeclarations(processedSvgContent)
+    }>
             <rect width="${targetWidth}" height="${targetHeight}" fill="${paddingColor}"/>
             <svg x="${socialDimensions.x}" y="${socialDimensions.y}"
                  width="${socialDimensions.imageWidth}" height="${socialDimensions.imageHeight}"

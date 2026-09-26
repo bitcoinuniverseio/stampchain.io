@@ -84,6 +84,25 @@ export interface SvgConversionOptions {
 }
 
 /**
+ * Namespace prefix declarations (` xmlns:xlink="..."`) for an SVG that
+ * replaces `svgContent`'s root element. The stamp's own root carries these;
+ * without them `xlink:href` (every SRC-721 layer) fails to parse. xlink is
+ * always declared because SVG content uses it without declaring it too.
+ */
+export function svgNamespaceDeclarations(svgContent: string): string {
+  const rootTag = svgContent.match(/<svg\b[^>]*>/i)?.[0] ?? "";
+  const declarations = new Map<string, string>([
+    ["xlink", "http://www.w3.org/1999/xlink"],
+  ]);
+  for (const match of rootTag.matchAll(/\sxmlns:([\w.-]+)=(["'])(.*?)\2/g)) {
+    declarations.set(match[1], match[3]);
+  }
+  return [...declarations]
+    .map(([prefix, uri]) => ` xmlns:${prefix}="${uri}"`)
+    .join("");
+}
+
+/**
  * Calculate dimensions for social media preview (1.91:1 aspect ratio)
  */
 export function calculateSocialMediaDimensions(
