@@ -11,7 +11,7 @@ on:
 
 jobs:
   validate-schema:
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-super]
     timeout-minutes: 5
     
     steps:
