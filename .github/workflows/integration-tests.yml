@@ -97,6 +97,7 @@ jobs:
       - name: Wait for MySQL
         run: |
           echo "Waiting for MySQL to be ready..."
+          # shellcheck disable=SC2016 # the inner shell expands the exported variables
           timeout 60 bash -c 'until mysqladmin ping -h 127.0.0.1 -P "$DB_PORT" -u root -ptestpassword --silent; do
             echo "MySQL not ready yet, waiting..."
             sleep 2
