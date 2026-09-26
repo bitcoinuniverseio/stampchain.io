@@ -88,7 +88,7 @@ export async function getRedisConnection(): Promise<any> {
 
   // Get Redis endpoint from environment
   const redisEndpoint = Deno.env.get("ELASTICACHE_ENDPOINT") || "localhost";
-  const redisPort = 6379;
+  const redisPort = Number(Deno.env.get("REDIS_PORT") || 6379);
   const skipTLS = Deno.env.get("SKIP_REDIS_TLS") === "true";
 
   try {
