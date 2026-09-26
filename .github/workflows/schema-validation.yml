@@ -17,10 +17,9 @@ env:
   NODE_VERSION: "18"
 
 jobs:
-  # CRITICAL: Schema validation prevents API breaking changes
   api-schema-validation:
     name: API Schema Validation
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    runs-on: [self-hosted, linux, x64, universe-super]
     timeout-minutes: 25
     permissions:
       contents: read
