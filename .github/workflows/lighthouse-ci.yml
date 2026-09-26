@@ -163,6 +163,16 @@ jobs:
           echo ""
           echo "✅ Server is responding correctly"
 
+      - name: Point Lighthouse at the runner's Chromium
+        # Self-hosted runners carry Playwright's Chrome for Testing; Lighthouse
+        # needs its path because no system Chrome is installed.
+        run: |
+          browsers="${PLAYWRIGHT_BROWSERS_PATH:-$HOME/.cache/ms-playwright}"
+          chrome=$(ls -1d "$browsers"/chromium-*/chrome-linux*/chrome 2>/dev/null | sort -V | tail -1)
+          if [ -z "$chrome" ]; then echo "No Playwright Chromium under $browsers"; exit 1; fi
+          "$chrome" --version
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+
       - name: Run Lighthouse CI - Collect
         id: lhci-collect
         run: |

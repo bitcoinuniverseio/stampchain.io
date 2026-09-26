@@ -889,12 +889,12 @@ jobs:
         run: |
           if [ -f dev-server.pid ]; then
             echo "Stopping dev server..."
-            kill $(cat dev-server.pid) || true
+            kill "$(cat dev-server.pid)" || true
             rm dev-server.pid
           fi
           if [ -f mock-api-server.pid ]; then
             echo "Stopping mock API server..."
-            kill $(cat mock-api-server.pid) || true
+            kill "$(cat mock-api-server.pid)" || true
             rm mock-api-server.pid
           fi
 
