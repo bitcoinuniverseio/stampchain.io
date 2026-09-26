@@ -214,7 +214,8 @@ describe("FetchHttpClient Core Tests", () => {
     it("rejects to the caller without an unhandled rejection", async () => {
       globalThis.fetch = () =>
         Promise.reject(new TypeError("client error (Connect)"));
-      const client = new FetchHttpClient(1000, 0, 1, 3, 5);
+      // No timeout: these tests are about rejections, and a timer would leak.
+      const client = new FetchHttpClient(0, 0, 1, 3, 5);
 
       let caught: unknown;
       try {
@@ -240,7 +241,7 @@ describe("FetchHttpClient Core Tests", () => {
             }),
           );
       };
-      const client = new FetchHttpClient(1000, 0, 1, 1, 5);
+      const client = new FetchHttpClient(0, 0, 1, 1, 5);
 
       const first = client.get("http://a.test/1").catch((e) => e);
       const second = await client.get("http://a.test/2");
