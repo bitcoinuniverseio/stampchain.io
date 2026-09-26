@@ -600,7 +600,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: test
           MYSQL_DATABASE: btcstamps_test
         ports:
-          - 3306:3306
+          - 3306
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -610,7 +610,7 @@ jobs:
       redis:
         image: redis:7-alpine
         ports:
-          - 6379:6379
+          - 6379
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -622,15 +622,12 @@ jobs:
       DENO_ENV: development
       # Database configuration
       DB_HOST: 127.0.0.1
-      DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: test
       DB_NAME: btcstamps_test
       # Disable TLS for CI Docker MySQL (RDS CA cert doesn't match Docker's self-signed cert)
       DB_ENABLE_TLS: "false"
       # Redis configuration
-      REDIS_URL: redis://127.0.0.1:6379
-      ELASTICACHE_ENDPOINT: 127.0.0.1:6379
       SKIP_REDIS_CONNECTION: false
       # Mock API keys for testing
       QUICKNODE_API_KEY: test-quicknode-key
@@ -642,6 +639,15 @@ jobs:
       BLOCKSTREAM_API_URL: http://localhost:18443/blockstream/api
 
     steps:
+      - name: Resolve service container ports
+        # Services publish ephemeral host ports so concurrent jobs on a shared self-hosted host never collide.
+        run: |
+          {
+            echo "DB_PORT=${{ job.services.mysql.ports['3306'] }}"
+            echo "REDIS_PORT=${{ job.services.redis.ports['6379'] }}"
+            echo "REDIS_URL=redis://127.0.0.1:${{ job.services.redis.ports['6379'] }}"
+            echo "ELASTICACHE_ENDPOINT=127.0.0.1"
+          } >> "$GITHUB_ENV"
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -674,7 +680,7 @@ jobs:
       - name: Wait for MySQL
         run: |
           echo "Waiting for MySQL to be ready..."
-          timeout 60 bash -c 'until mysqladmin ping -h 127.0.0.1 -P 3306 -u root -ptest --silent; do
+          timeout 60 bash -c 'until mysqladmin ping -h 127.0.0.1 -P "$DB_PORT" -u root -ptest --silent; do
             echo "MySQL not ready yet, waiting..."
             sleep 2
           done'
@@ -683,7 +689,7 @@ jobs:
       - name: Wait for Redis
         run: |
           echo "Waiting for Redis to be ready..."
-          timeout 30 bash -c 'until nc -z 127.0.0.1 6379; do
+          timeout 30 bash -c 'until nc -z 127.0.0.1 "$REDIS_PORT"; do
             echo "Redis not ready yet, waiting..."
             sleep 1
           done'
@@ -692,21 +698,21 @@ jobs:
       - name: Load test schema
         run: |
           echo "Loading test schema..."
-          mysql -h 127.0.0.1 -P 3306 -u root -ptest btcstamps_test < scripts/test-schema.sql
+          mysql -h 127.0.0.1 -P "$DB_PORT" -u root -ptest btcstamps_test < scripts/test-schema.sql
           echo "✅ Test schema loaded"
 
       - name: Load test seed data
         run: |
           echo "Loading test seed data..."
-          mysql -h 127.0.0.1 -P 3306 -u root -ptest btcstamps_test < scripts/test-seed-data.sql
+          mysql -h 127.0.0.1 -P "$DB_PORT" -u root -ptest btcstamps_test < scripts/test-seed-data.sql
           echo "✅ Test seed data loaded"
 
       - name: Verify test data
         run: |
           echo "Verifying test data..."
-          mysql -h 127.0.0.1 -P 3306 -u root -ptest btcstamps_test -e "SHOW TABLES;"
-          mysql -h 127.0.0.1 -P 3306 -u root -ptest btcstamps_test -e "SELECT COUNT(*) AS stamp_count FROM StampTableV4;"
-          mysql -h 127.0.0.1 -P 3306 -u root -ptest btcstamps_test -e "SELECT COUNT(*) AS block_count FROM blocks;"
+          mysql -h 127.0.0.1 -P "$DB_PORT" -u root -ptest btcstamps_test -e "SHOW TABLES;"
+          mysql -h 127.0.0.1 -P "$DB_PORT" -u root -ptest btcstamps_test -e "SELECT COUNT(*) AS stamp_count FROM StampTableV4;"
+          mysql -h 127.0.0.1 -P "$DB_PORT" -u root -ptest btcstamps_test -e "SELECT COUNT(*) AS block_count FROM blocks;"
           echo "✅ Test data verified"
 
       - name: Cache Deno dependencies for dev server
@@ -743,7 +749,7 @@ jobs:
           DB_USER=root \
           DB_PASSWORD=test \
           DB_NAME=btcstamps_test \
-          REDIS_URL=redis://127.0.0.1:6379 \
+          REDIS_URL="$REDIS_URL" \
           XCP_API_URL=http://localhost:18443/v2 \
           MEMPOOL_API_URL=http://localhost:18443/mempool/api \
           BLOCKSTREAM_API_URL=http://localhost:18443/blockstream/api \

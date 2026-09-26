@@ -212,7 +212,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: test
           MYSQL_DATABASE: btcstamps_test
         ports:
-          - 3306:3306
+          - 3306
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -222,7 +222,7 @@ jobs:
       redis:
         image: redis:7-alpine
         ports:
-          - 6379:6379
+          - 6379
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -233,13 +233,10 @@ jobs:
       CI: true
       DENO_ENV: development
       DB_HOST: 127.0.0.1
-      DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: test
       DB_NAME: btcstamps_test
       DB_ENABLE_TLS: "false"
-      REDIS_URL: redis://127.0.0.1:6379
-      ELASTICACHE_ENDPOINT: 127.0.0.1:6379
       SKIP_REDIS_CONNECTION: false
       QUICKNODE_API_KEY: test-quicknode-key
       # Mock external APIs for POST endpoint testing
@@ -248,6 +245,15 @@ jobs:
       BLOCKSTREAM_API_URL: http://localhost:18443/blockstream/api
 
     steps:
+      - name: Resolve service container ports
+        # Services publish ephemeral host ports so concurrent jobs on a shared self-hosted host never collide.
+        run: |
+          {
+            echo "DB_PORT=${{ job.services.mysql.ports['3306'] }}"
+            echo "REDIS_PORT=${{ job.services.redis.ports['6379'] }}"
+            echo "REDIS_URL=redis://127.0.0.1:${{ job.services.redis.ports['6379'] }}"
+            echo "ELASTICACHE_ENDPOINT=127.0.0.1"
+          } >> "$GITHUB_ENV"
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -258,8 +264,8 @@ jobs:
 
       - name: Load test schema and seed data
         run: |
-          mysql -h 127.0.0.1 -P 3306 -u root -ptest btcstamps_test < scripts/test-schema.sql
-          mysql -h 127.0.0.1 -P 3306 -u root -ptest btcstamps_test < scripts/test-seed-data.sql
+          mysql -h 127.0.0.1 -P "$DB_PORT" -u root -ptest btcstamps_test < scripts/test-schema.sql
+          mysql -h 127.0.0.1 -P "$DB_PORT" -u root -ptest btcstamps_test < scripts/test-seed-data.sql
           echo "✅ Test data loaded"
 
       - name: Start mock external API server
