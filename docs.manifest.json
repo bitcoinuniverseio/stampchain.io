@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "stampchain-io",
+  "name": "Stampchain explorer and API",
+  "classification": "infrastructure",
+  "repository": "bitcoinuniverseio/stampchain.io",
+  "documentationUrl": "https://docs.bitcoinuniverse.io/developers/interfaces/",
+  "docsRoot": "docs",
+  "sourceRef": "dev",
+  "lifecycle": "experimental",
+  "chains": [
+    {
+      "chain": "bitcoin",
+      "networks": [
+        "mainnet"
+      ]
+    }
+  ],
+  "protocols": [
+    "stamps",
+    "src-20",
+    "src-101"
+  ],
+  "audiences": [
+    "user",
+    "app-developer",
+    "infrastructure-operator"
+  ],
+  "contracts": {
+    "openapi": [
+      "schema.yml"
+    ]
+  },
+  "owners": [
+    "bitcoinuniverseio"
+  ],
+  "upstream": {
+    "project": "stampchain-io/stampchain.io",
+    "url": "https://github.com/stampchain-io/stampchain.io",
+    "license": "AGPL-3.0",
+    "relationship": "fork",
+    "divergenceSummary": "Bitcoin Stamps explorer and API. Upstream tags are the upstream project's release line."
+  },
+  "lastVerified": {
+    "commit": "dcd1c649c035978468c21241b06cd9ad4ac77081",
+    "timestamp": "2026-09-01T12:00:00Z"
+  },
+  "securityClassification": "public"
+}

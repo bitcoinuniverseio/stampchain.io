@@ -11,7 +11,7 @@ export default function PressKit() {
               PRESS KIT
             </span>
             <br />
-            LOREM IPSUM
+            BRAND ASSETS
           </h1>
         </section>
 
@@ -22,91 +22,45 @@ export default function PressKit() {
                 BITCOIN STAMPS
               </h1>
               <h2 class="text-2xl tablet:text-5xl font-extralight mb-3">
-                BRANDING
+                THE PROTOCOL
               </h2>
               <p class="text-sm tablet:text-lg font-medium">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
-                diam libero, faucibus ut sagittis at, rutrum nec eros. Donec sit
-                amet blandit arcu. Nullam ultrices a mauris non efficitur. Morbi
-                in purus a erat mollis tincidunt eget sit amet velit. Mauris
-                ultricies mauris id commodo convallis. Proin et purus et nunc
-                tincidunt pellentesque. Quisque commodo est at sollicitudin
-                ultricies.
+                Bitcoin Stamps is a meta-protocol that stores data directly in
+                Bitcoin's UTXO set. Because the data lives in unspent outputs
+                rather than in witness data, a Stamp cannot be pruned and cannot
+                be accidentally spent away. The first official Stamp was created
+                in block 779,652.
               </p>
             </div>
 
             <div>
               <h2 class="text-2xl tablet:text-5xl font-extralight mb-3">
-                TEXT
+                WORDMARK
               </h2>
               <p class="text-sm tablet:text-lg font-medium">
-                NFT tokens where each Stamp can utilize a built-in token layer
-                via standards developed on Counterparty in 2014. Originally,
-                Stamps were encouraged to be 1:1, but creators can issue up to
-                4,294,967,295 individual tokens per Stamp
+                The Bitcoin Stamps wordmark is set in Micro 5, a pixel typeface,
+                shown here in the orange used across stampchain.io.
               </p>
             </div>
 
             <div>
               <h2 class="text-2xl tablet:text-5xl font-extralight mb-3">
-                STAMP AI MEMES
+                SUB-PROTOCOLS
               </h2>
               <p class="text-sm tablet:text-lg font-medium">
-                A token layer built around a fair mint system where users only
-                pay BTC miner fees. Modeled after BRC-20, but with the
-                immutability of Stamps. History: The first official SRC-20 Token
-                (KEVIN) was deployed by Reinamora in Block 788041.
+                Classic Stamps carry images and can use a built-in token layer
+                via Counterparty standards. SRC-20 is a fair-mint fungible token
+                standard where users pay standard BTC miner fees only; the first
+                SRC-20 token, KEVIN, was deployed in block 788,041. SRC-721
+                composes layered artwork from multiple Stamps. SRC-101 is a
+                naming system built on Stamps.
               </p>
             </div>
-
-            <div>
-              <h2 class="text-2xl tablet:text-5xl font-extralight mb-3">
-                PROMO BANNERS
-              </h2>
-              <p class="text-sm tablet:text-lg font-medium">
-                A domain name system built on Bitcoin Stamps. Currently in
-                development. Since SATs don't exist, we Stamp on the UTXO set to
-                ensure immutability. It is impossible to inscribe a Stamp.
-              </p>
-            </div>
-
-            <div>
-              <h2 class="text-2xl tablet:text-5xl font-extralight mb-3">
-                ART STAMPS
-              </h2>
-              <p class="text-sm tablet:text-lg font-medium">
-                A domain name system built on Bitcoin Stamps. Currently in
-                development. Since SATs don't exist, we Stamp on the UTXO set to
-                ensure immutability. It is impossible to inscribe a Stamp.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              class="bg-color-grey text-color-background text-xl font-extrabold rounded-md w-[160px] h-[60px]"
-            >
-              DOWNLOAD
-            </button>
           </div>
 
           <div class="text-color-orange-light flex flex-col items-center tablet:items-end gap-3 tablet:gap-6 w-full tablet:w-1/2 font-micro-5">
             <p class="text-4xl tablet:text-7xl">BITCOIN STAMPS</p>
             <p class="text-6xl tablet:text-9xl">STAMPS</p>
-            <div class="flex gap-3 tablet:gap-6">
-              <img src="/img/home/carousel1.png" class="w-20 h-20" />
-              <img src="/img/home/carousel2.png" class="w-20 h-20" />
-              <img src="/img/home/carousel3.png" class="w-20 h-20" />
-            </div>
-            <div class="flex gap-3 tablet:gap-6">
-              <img src="/img/home/carousel1.png" class="w-20 h-20" />
-              <img src="/img/home/carousel2.png" class="w-20 h-20" />
-              <img src="/img/home/carousel3.png" class="w-20 h-20" />
-            </div>
-            <div class="flex gap-3 tablet:gap-6">
-              <img src="/img/home/carousel1.png" class="w-20 h-20" />
-              <img src="/img/home/carousel2.png" class="w-20 h-20" />
-              <img src="/img/home/carousel3.png" class="w-20 h-20" />
-            </div>
           </div>
         </section>
 
@@ -117,40 +71,35 @@ export default function PressKit() {
                 STAMPCHAIN
               </h1>
               <h2 class="text-2xl tablet:text-5xl font-extralight mb-3">
-                BRANDING
+                THE EXPLORER
               </h2>
               <p class="text-sm tablet:text-lg font-medium">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
-                diam libero, faucibus ut sagittis at, rutrum nec eros. Donec sit
-                amet blandit arcu. Nullam ultrices a mauris non efficitur. Morbi
-                in purus a erat mollis tincidunt eget sit amet velit. Mauris
-                ultricies mauris id commodo convallis. Proin et purus et nunc
-                tincidunt pellentesque. Quisque commodo est at sollicitudin
-                ultricies.
+                Stampchain is the block explorer and public API for Bitcoin
+                Stamps. It serves stamp, SRC-20, SRC-721 and SRC-101 data read
+                from the Bitcoin Stamps indexer. The API is described by an
+                OpenAPI 3.0 contract and is browsable at /docs.
               </p>
             </div>
 
             <div>
               <h2 class="text-2xl tablet:text-5xl font-extralight mb-3">
-                TEXT LOGO
+                WORDMARK
               </h2>
               <p class="text-sm tablet:text-lg font-medium">
-                NFT tokens where each Stamp can utilize a built-in token layer
-                via standards developed on Counterparty in 2014. Originally,
-                Stamps were encouraged to be 1:1, but creators can issue up to
-                4,294,967,295 individual tokens per Stamp
+                Two lockups: STAMPCHAIN on its own, and STAMPCHAIN.IO with the
+                domain suffix set lighter than the name. Both are italic and use
+                the purple gradient shown below.
               </p>
             </div>
 
             <div>
               <h2 class="text-2xl tablet:text-5xl font-extralight mb-3">
-                IMAGE
+                LOGO MARKS
               </h2>
               <p class="text-sm tablet:text-lg font-medium">
-                A token layer built around a fair mint system where users only
-                pay BTC miner fees. Modeled after BRC-20, but with the
-                immutability of Stamps. History: The first official SRC-20 Token
-                (KEVIN) was deployed by Reinamora in Block 788041.
+                Six SVG marks at 1000px: the stamp logo and the stamp logo with
+                the Bitcoin symbol, each in the base, medium purple and light
+                purple treatments. Click any mark below to open the SVG.
               </p>
             </div>
 
@@ -159,24 +108,19 @@ export default function PressKit() {
                 COLOR PALETTE
               </h2>
               <p class="text-sm tablet:text-lg font-medium">
-                A domain name system built on Bitcoin Stamps. Currently in
-                development. Since SATs don't exist, we Stamp on the UTXO set to
-                ensure immutability. It is impossible to inscribe a Stamp.
+                The purple ramp runs dark to light across five steps and carries
+                the brand. The grey ramp is the interface palette, used for
+                text, borders and surfaces against the dark background. Both are
+                shown at the bottom of this page.
               </p>
             </div>
 
             <div class="mt-5 flex flex-col items-center">
               <img
-                src="/img/stampchain_assets/STAMPCHAIN_animated_logo.gif"
-                alt="Stampchain Logo Animated"
+                src="/img/logo/stampchain-logo-480.svg"
+                alt="Stampchain logo"
                 class="max-w-full h-auto"
               />
-              <button
-                type="button"
-                class="bg-color-grey text-color-background text-xl font-extrabold rounded-md w-[160px] h-[60px]"
-              >
-                DOWNLOAD
-              </button>
             </div>
           </div>
 
@@ -188,14 +132,44 @@ export default function PressKit() {
               STAMPCHAIN<span class="font-extralight">.IO</span>
             </p>
             <div class="flex gap-6">
-              <img src="/img/presskit/stamp-logo-1000.svg" />
-              <img src="/img/presskit/stamp-logo-purpleMedium-1000.svg" />
-              <img src="/img/presskit/stamp-logo-purpleLight-1000.svg" />
+              <a href="/img/presskit/stamp-logo-1000.svg">
+                <img
+                  src="/img/presskit/stamp-logo-1000.svg"
+                  alt="Stamp logo"
+                />
+              </a>
+              <a href="/img/presskit/stamp-logo-purpleMedium-1000.svg">
+                <img
+                  src="/img/presskit/stamp-logo-purpleMedium-1000.svg"
+                  alt="Stamp logo, medium purple"
+                />
+              </a>
+              <a href="/img/presskit/stamp-logo-purpleLight-1000.svg">
+                <img
+                  src="/img/presskit/stamp-logo-purpleLight-1000.svg"
+                  alt="Stamp logo, light purple"
+                />
+              </a>
             </div>
             <div class="flex gap-6">
-              <img src="/img/presskit/stamp-logo-btc-1000.svg" />
-              <img src="/img/presskit/stamp-logo-btc-purpleMedium-1000.svg" />
-              <img src="/img/presskit/stamp-logo-btc-purpleLight-1000.svg" />
+              <a href="/img/presskit/stamp-logo-btc-1000.svg">
+                <img
+                  src="/img/presskit/stamp-logo-btc-1000.svg"
+                  alt="Stamp logo with Bitcoin symbol"
+                />
+              </a>
+              <a href="/img/presskit/stamp-logo-btc-purpleMedium-1000.svg">
+                <img
+                  src="/img/presskit/stamp-logo-btc-purpleMedium-1000.svg"
+                  alt="Stamp logo with Bitcoin symbol, medium purple"
+                />
+              </a>
+              <a href="/img/presskit/stamp-logo-btc-purpleLight-1000.svg">
+                <img
+                  src="/img/presskit/stamp-logo-btc-purpleLight-1000.svg"
+                  alt="Stamp logo with Bitcoin symbol, light purple"
+                />
+              </a>
             </div>
           </div>
         </section>
@@ -209,11 +183,6 @@ export default function PressKit() {
               <div class="bg-color-purple-semilight w-12 h-12 rounded-[3px]" />
               <div class="bg-color-purple-light w-12 h-12 rounded-[3px]" />
             </div>
-            <div class="bg-white rounded-md p-6 flex gap-6">
-              <div class="bg-white w-12 h-12 rounded-[3px]" />
-              <div class="bg-white w-12 h-12 rounded-[3px]" />
-              <div class="bg-white w-12 h-12 rounded-[3px]" />
-            </div>
           </div>
           <div class="flex gap-10">
             <div class="bg-white rounded-md p-6 flex gap-6">
@@ -221,12 +190,7 @@ export default function PressKit() {
               <div class="bg-color-grey-semidark w-12 h-12 rounded-[3px]" />
               <div class="bg-color-grey w-12 h-12 rounded-[3px]" />
               <div class="bg-color-grey-light w-12 h-12 rounded-[3px]" />
-              <div class="bg-white w-12 h-12 rounded-[3px]" />
-            </div>
-            <div class="bg-white rounded-md p-6 flex gap-6">
               <div class="bg-color-background w-12 h-12 rounded-[3px]" />
-              <div class="bg-white w-12 h-12 rounded-[3px]" />
-              <div class="bg-white w-12 h-12 rounded-[3px]" />
             </div>
           </div>
         </section>

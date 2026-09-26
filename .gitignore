@@ -185,8 +185,12 @@ dev-debug.log
 mcp.json
 docs/delegation/
 docs/delegation/archive/
-# Security: Exclude files that may contain local paths
-docs/
+# Security: Exclude files that may contain local paths.
+# Markdown is exempt: docs/ is the docsRoot declared in docs.manifest.json and
+# 16 .md files are already tracked here, so a blanket ignore silently dropped
+# every new document added to this directory.
+docs/*
+!docs/*.md
 logs/*
 coverage.lcov
 .claude/
