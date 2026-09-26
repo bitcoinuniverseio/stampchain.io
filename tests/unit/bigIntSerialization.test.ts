@@ -127,18 +127,19 @@ describe("BigInt Serialization and Deserialization", () => {
     assertEquals(deserialized, "invalid_number");
   });
 
-  it("should preserve existing string-based BigInt parsing", () => {
-    // Test the fallback behavior for existing cached data
-    const stringBigInt = "123456789012345678901234567890";
-    const smallString = "42";
+  it("keeps digit-only strings as strings so a cache hit matches a miss", () => {
+    const row = {
+      tick: "69420",
+      zeroTick: "0",
+      paddedTick: "007",
+      max: "123456789012345678901234567890",
+    };
 
-    const parsedLarge = JSON.parse(`"${stringBigInt}"`, bigIntReviver);
-    const parsedSmall = JSON.parse(`"${smallString}"`, bigIntReviver);
+    const roundTripped = JSON.parse(
+      JSON.stringify(row, bigIntSerializer),
+      bigIntReviver,
+    );
 
-    // Large numbers should become BigInt
-    assertEquals(parsedLarge, BigInt(stringBigInt));
-
-    // Small numbers should remain as numbers
-    assertEquals(parsedSmall, 42);
+    assertEquals(roundTripped, row);
   });
 });
