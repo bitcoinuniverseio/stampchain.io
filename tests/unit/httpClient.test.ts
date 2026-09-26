@@ -210,6 +210,46 @@ describe("FetchHttpClient Core Tests", () => {
     });
   });
 
+  describe("Failed upstream requests", () => {
+    it("rejects to the caller without an unhandled rejection", async () => {
+      globalThis.fetch = () =>
+        Promise.reject(new TypeError("client error (Connect)"));
+      const client = new FetchHttpClient(1000, 0, 1, 3, 5);
+
+      let caught: unknown;
+      try {
+        await client.get("http://127.0.0.1:4000/v2/assets/A1/sends");
+      } catch (error) {
+        caught = error;
+      }
+      assert(caught instanceof TypeError);
+      // Let any derived promise settle; Deno fails this test on an
+      // unhandled rejection, which used to kill the API process.
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+
+    it("does not fail a queued request because another one failed", async () => {
+      let calls = 0;
+      globalThis.fetch = () => {
+        calls++;
+        return calls === 1
+          ? Promise.reject(new TypeError("client error (Connect)"))
+          : Promise.resolve(
+            new Response('{"ok":true}', {
+              headers: { "content-type": "application/json" },
+            }),
+          );
+      };
+      const client = new FetchHttpClient(1000, 0, 1, 1, 5);
+
+      const first = client.get("http://a.test/1").catch((e) => e);
+      const second = await client.get("http://a.test/2");
+
+      assert((await first) instanceof TypeError);
+      assertEquals(second.data, { ok: true });
+    });
+  });
+
   describe("Error Handling", () => {
     it("should handle JSON parsing errors gracefully", async () => {
       // Create a mock response that simulates JSON parsing failure
