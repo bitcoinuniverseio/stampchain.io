@@ -62,8 +62,8 @@ jobs:
 
   daily-regression:
     name: Daily API Regression Testing
-    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-medium]
-    needs: [check-schedule]
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
+    needs: check-schedule
     if: needs.check-schedule.outputs.should_run == 'true'
     timeout-minutes: 45
     
@@ -416,7 +416,7 @@ jobs:
   weekly-summary:
     name: Weekly Summary Report
     runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
-    needs: [check-schedule]
+    needs: check-schedule
     if: needs.check-schedule.outputs.day_of_week == '0' && needs.check-schedule.outputs.should_run == 'true'
     
     steps:

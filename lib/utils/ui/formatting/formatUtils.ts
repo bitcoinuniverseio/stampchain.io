@@ -224,21 +224,9 @@ export function bigIntReviver(_key: string, value: unknown): unknown {
     }
   }
 
-  // Fallback: Check if value is a string that represents a valid BigInt
-  if (typeof value === "string" && /^-?\d+$/.test(value)) {
-    // Try to determine if this should be a BigInt based on size
-    // Numbers larger than MAX_SAFE_INTEGER should be BigInt
-    const num = Number(value);
-    if (!isNaN(num) && Math.abs(num) <= Number.MAX_SAFE_INTEGER) {
-      return num; // Keep as number if within safe range
-    }
-    // Convert to BigInt for large numbers
-    try {
-      return BigInt(value);
-    } catch {
-      return value; // Return original string if BigInt conversion fails
-    }
-  }
+  // Every other value comes back exactly as it was stored. Digit-only strings
+  // are real data (SRC-20 ticks like "69420", supplies, amounts); turning them
+  // into numbers made a cache hit disagree with a cache miss.
   return value;
 }
 

@@ -125,8 +125,11 @@ export class FetchHttpClient implements HttpClient {
    */
   private async waitForAvailableSlot(): Promise<void> {
     if (this.activeRequests.size >= this.maxConcurrentRequests) {
-      // Wait for any request to complete
-      await Promise.race(this.activeRequests);
+      // Wait for any request to complete. Another request failing frees a
+      // slot too; it must not fail this one.
+      await Promise.race(
+        [...this.activeRequests].map((p) => p.catch(() => {})),
+      );
     }
   }
 
@@ -420,10 +423,15 @@ export class FetchHttpClient implements HttpClient {
     // Add to active requests
     this.activeRequests.add(requestPromise);
 
-    // Clean up from active requests when done
-    requestPromise.finally(() => {
-      this.activeRequests.delete(requestPromise);
-    });
+    // Clean up from active requests when done. The caller receives the
+    // rejection through `requestPromise`; the promise `finally` derives must
+    // not reject unhandled, or one failed upstream request (Counterparty
+    // down) terminates the whole Deno process.
+    requestPromise
+      .finally(() => {
+        this.activeRequests.delete(requestPromise);
+      })
+      .catch(() => {});
 
     return requestPromise;
   }

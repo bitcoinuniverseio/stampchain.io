@@ -71,7 +71,7 @@ jobs:
   build:
     name: Build via CodeBuild
     runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
-    needs: [pre-check]
+    needs: pre-check
     if: github.repository == 'stampchain-io/stampchain.io' && (needs.pre-check.outputs.deploy_mode == 'codebuild')
     timeout-minutes: 20
 
@@ -203,7 +203,7 @@ jobs:
 
   deploy:
     name: Deploy to ECS
-    runs-on: [self-hosted, universe-ci, linux-container-builder]
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     needs: [pre-check, build]
     if: github.repository == 'stampchain-io/stampchain.io' && (always() && (needs.build.result == 'success' || needs.pre-check.outputs.deploy_mode == 'deploy-only'))
     timeout-minutes: 30
@@ -511,7 +511,7 @@ jobs:
 
   rollback:
     name: Rollback on Failure
-    runs-on: [self-hosted, universe-ci, linux-container-builder]
+    runs-on: [self-hosted, linux, x64, universe, gcp, universe-gcp-small]
     needs: [pre-check, deploy, validate]
     if: github.repository == 'stampchain-io/stampchain.io' && (failure() && needs.deploy.outputs.previous_task_def != '' && needs.pre-check.outputs.dry_run != 'true')
     timeout-minutes: 10
