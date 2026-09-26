@@ -730,11 +730,11 @@ jobs:
           echo $! > dev-server.pid
 
           echo "Waiting for dev server to be ready (max 60s)..."
-          timeout 60 bash -c 'until curl -f -s http://localhost:8000/api/v2/health > /dev/null 2>&1; do
+          timeout 300 bash -c 'until curl -f -s http://localhost:8000/api/v2/health > /dev/null 2>&1; do
             echo "Dev server not ready yet, waiting..."
             sleep 2
           done' || {
-            echo "❌ Dev server failed to start within 60 seconds"
+            echo "❌ Dev server failed to start within 300 seconds"
             echo "=== Dev Server Logs ==="
             cat dev-server.log || echo "No logs available"
             exit 1
