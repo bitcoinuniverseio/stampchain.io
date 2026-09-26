@@ -168,7 +168,7 @@ jobs:
         run: |
           # Docker containers run as root and change file ownership
           # This prevents EACCES errors in subsequent steps
-          sudo chown -R $(id -u):$(id -g) . || true
+          sudo chown -R "$(id -u):$(id -g)" . || true
 
       - name: Analyze Regression Results
         id: regression-analysis
@@ -551,7 +551,7 @@ jobs:
 
       - name: Fix Docker file permissions
         if: always()
-        run: sudo chown -R $(id -u):$(id -g) . || true
+        run: sudo chown -R "$(id -u):$(id -g)" . || true
 
       - name: Store performance results
         if: always()
@@ -651,6 +651,7 @@ jobs:
       - name: Wait for MySQL
         run: |
           echo "Waiting for MySQL to be ready..."
+          # shellcheck disable=SC2016 # the inner shell expands the exported variables
           timeout 60 bash -c 'until mysqladmin ping -h 127.0.0.1 -P "$DB_PORT" -u root -ptest --silent; do
             echo "MySQL not ready yet, waiting..."
             sleep 2
@@ -660,6 +661,7 @@ jobs:
       - name: Wait for Redis
         run: |
           echo "Waiting for Redis to be ready..."
+          # shellcheck disable=SC2016 # the inner shell expands the exported variables
           timeout 30 bash -c 'until nc -z 127.0.0.1 "$REDIS_PORT"; do
             echo "Redis not ready yet, waiting..."
             sleep 1
@@ -699,6 +701,7 @@ jobs:
           echo "Mock server started with PID: $(cat mock-api-server.pid)"
 
           # Wait for mock server to be ready
+          # shellcheck disable=SC2016 # the inner shell expands the exported variables
           timeout 15 bash -c 'until curl -f -s http://localhost:18443/health > /dev/null 2>&1; do
             echo "Mock server not ready yet, waiting..."
             sleep 1
@@ -730,6 +733,7 @@ jobs:
           echo $! > dev-server.pid
 
           echo "Waiting for dev server to be ready (max 60s)..."
+          # shellcheck disable=SC2016 # the inner shell expands the exported variables
           timeout 300 bash -c 'until curl -f -s http://localhost:8000/api/v2/health > /dev/null 2>&1; do
             echo "Dev server not ready yet, waiting..."
             sleep 2
@@ -1043,7 +1047,7 @@ jobs:
 
       - name: Fix Docker file permissions
         if: always()
-        run: sudo chown -R $(id -u):$(id -g) . || true
+        run: sudo chown -R "$(id -u):$(id -g)" . || true
 
       - name: Parse test results
         if: always()
