@@ -261,7 +261,7 @@ jobs:
           deno cache --no-check main.ts dev.ts
           nohup deno run -A dev.ts > dev-server.log 2>&1 &
           echo $! > dev-server.pid
-          timeout 60 bash -c 'until curl -f -s http://localhost:8000/api/v2/health > /dev/null 2>&1; do
+          timeout 300 bash -c 'until curl -f -s http://localhost:8000/api/v2/health > /dev/null 2>&1; do
             sleep 2
           done' || { cat dev-server.log; exit 1; }
           echo "✅ Dev server ready at http://localhost:8000"
