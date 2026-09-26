@@ -83,17 +83,6 @@ jobs:
       - name: Install LHCI
         run: npm install -g @lhci/cli@0.14.x
 
-      - name: Cache Deno dependencies
-        uses: actions/cache@v6
-        with:
-          path: |
-            ~/.deno
-            ~/.cache/deno
-          key: ${{ runner.os }}-deno-lighthouse-${{ hashFiles('**/deno.json') }}
-          restore-keys: |
-            ${{ runner.os }}-deno-lighthouse-
-            ${{ runner.os }}-deno-
-
       - name: Wait for MySQL
         run: |
           echo "Waiting for MySQL to be ready..."

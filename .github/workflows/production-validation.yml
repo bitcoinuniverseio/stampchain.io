@@ -36,13 +36,6 @@ jobs:
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
-      - name: Cache Deno dependencies
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/deno
-          key: deno-${{ hashFiles('deno.json', 'deno.lock') }}
-          restore-keys: deno-
-
       - name: Run TypeScript validation
         run: deno task check
 
@@ -73,13 +66,6 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: ${{ env.DENO_VERSION }}
-
-      - name: Cache Deno dependencies
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/deno
-          key: deno-${{ hashFiles('deno.json', 'deno.lock') }}
-          restore-keys: deno-
 
       - name: Run performance benchmarks
         run: deno task deploy:benchmark
@@ -146,13 +132,6 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: ${{ env.DENO_VERSION }}
-
-      - name: Cache Deno dependencies
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/deno
-          key: deno-cross-module-${{ hashFiles('deno.json', 'deno.lock') }}
-          restore-keys: deno-cross-module-
 
       - name: Run dependency graph analysis
         run: deno task validate:dependencies
