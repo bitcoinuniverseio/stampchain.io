@@ -383,6 +383,7 @@ jobs:
           while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
             ATTEMPT=$((ATTEMPT + 1))
 
+            # shellcheck disable=SC2016 # the JMESPath query is literal for aws, not shell
             ROLLOUT_STATE=$(aws ecs describe-services \
               --cluster "${{ env.ECS_CLUSTER }}" \
               --services "${{ env.ECS_SERVICE }}" \
