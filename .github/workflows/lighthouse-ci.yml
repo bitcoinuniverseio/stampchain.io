@@ -27,7 +27,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: test
           MYSQL_DATABASE: btcstamps_test
         ports:
-          - 3306:3306
+          - 3306
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -37,7 +37,7 @@ jobs:
       redis:
         image: redis:7-alpine
         ports:
-          - 6379:6379
+          - 6379
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -48,13 +48,10 @@ jobs:
       CI: true
       DENO_ENV: development
       DB_HOST: 127.0.0.1
-      DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: test
       DB_NAME: btcstamps_test
       DB_ENABLE_TLS: "false"
-      REDIS_URL: redis://127.0.0.1:6379
-      ELASTICACHE_ENDPOINT: 127.0.0.1:6379
       SKIP_REDIS_CONNECTION: false
       QUICKNODE_API_KEY: test-quicknode-key
       ANTHROPIC_API_KEY: test-anthropic-key
@@ -65,6 +62,15 @@ jobs:
       LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
     steps:
+      - name: Resolve service container ports
+        # Services publish ephemeral host ports so concurrent jobs on a shared self-hosted host never collide.
+        run: |
+          {
+            echo "DB_PORT=${{ job.services.mysql.ports['3306'] }}"
+            echo "REDIS_PORT=${{ job.services.redis.ports['6379'] }}"
+            echo "REDIS_URL=redis://127.0.0.1:${{ job.services.redis.ports['6379'] }}"
+            echo "ELASTICACHE_ENDPOINT=127.0.0.1"
+          } >> "$GITHUB_ENV"
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -77,21 +83,11 @@ jobs:
       - name: Install LHCI
         run: npm install -g @lhci/cli@0.14.x
 
-      - name: Cache Deno dependencies
-        uses: actions/cache@v6
-        with:
-          path: |
-            ~/.deno
-            ~/.cache/deno
-          key: ${{ runner.os }}-deno-lighthouse-${{ hashFiles('**/deno.json') }}
-          restore-keys: |
-            ${{ runner.os }}-deno-lighthouse-
-            ${{ runner.os }}-deno-
-
       - name: Wait for MySQL
         run: |
           echo "Waiting for MySQL to be ready..."
-          timeout 60 bash -c 'until mysqladmin ping -h 127.0.0.1 -P 3306 -u root -ptest --silent; do
+          # shellcheck disable=SC2016 # the inner shell expands the exported variables
+          timeout 60 bash -c 'until mysqladmin ping -h 127.0.0.1 -P "$DB_PORT" -u root -ptest --silent; do
             echo "MySQL not ready yet, waiting..."
             sleep 2
           done'
@@ -100,7 +96,8 @@ jobs:
       - name: Wait for Redis
         run: |
           echo "Waiting for Redis to be ready..."
-          timeout 30 bash -c 'until nc -z 127.0.0.1 6379; do
+          # shellcheck disable=SC2016 # the inner shell expands the exported variables
+          timeout 30 bash -c 'until nc -z 127.0.0.1 "$REDIS_PORT"; do
             echo "Redis not ready yet, waiting..."
             sleep 1
           done'
@@ -109,10 +106,10 @@ jobs:
       - name: Load test schema and seed data
         run: |
           echo "Loading test schema..."
-          mysql -h 127.0.0.1 -P 3306 -u root -ptest btcstamps_test < scripts/test-schema.sql
+          mysql -h 127.0.0.1 -P "$DB_PORT" -u root -ptest btcstamps_test < scripts/test-schema.sql
           echo "✅ Test schema loaded"
           echo "Loading test seed data..."
-          mysql -h 127.0.0.1 -P 3306 -u root -ptest btcstamps_test < scripts/test-seed-data.sql
+          mysql -h 127.0.0.1 -P "$DB_PORT" -u root -ptest btcstamps_test < scripts/test-seed-data.sql
           echo "✅ Test seed data loaded"
 
       - name: Cache Deno dependencies for dev server
@@ -127,6 +124,7 @@ jobs:
           echo $! > mock-api-server.pid
           echo "Mock server started with PID: $(cat mock-api-server.pid)"
 
+          # shellcheck disable=SC2016 # the inner shell expands the exported variables
           timeout 15 bash -c 'until curl -f -s http://localhost:18443/health > /dev/null 2>&1; do
             echo "Mock server not ready yet, waiting..."
             sleep 1
@@ -145,11 +143,12 @@ jobs:
           echo "Dev server started with PID: $(cat dev-server.pid)"
 
           echo "Waiting for dev server to be ready (max 90s)..."
-          timeout 90 bash -c 'until curl -f -s http://localhost:8000/api/v2/health > /dev/null 2>&1; do
+          # shellcheck disable=SC2016 # the inner shell expands the exported variables
+          timeout 300 bash -c 'until curl -f -s http://localhost:8000/api/v2/health > /dev/null 2>&1; do
             echo "Dev server not ready yet, waiting..."
             sleep 3
           done' || {
-            echo "❌ Dev server failed to start within 90 seconds"
+            echo "❌ Dev server failed to start within 300 seconds"
             echo "=== Dev Server Logs ==="
             cat dev-server.log || echo "No logs available"
             exit 1
@@ -163,6 +162,16 @@ jobs:
           curl -f http://localhost:8000/api/v2/health || exit 1
           echo ""
           echo "✅ Server is responding correctly"
+
+      - name: Point Lighthouse at the runner's Chromium
+        # Self-hosted runners carry Playwright's Chrome for Testing; Lighthouse
+        # needs its path because no system Chrome is installed.
+        run: |
+          browsers="${PLAYWRIGHT_BROWSERS_PATH:-$HOME/.cache/ms-playwright}"
+          chrome=$(ls -1d "$browsers"/chromium-*/chrome-linux*/chrome 2>/dev/null | sort -V | tail -1)
+          if [ -z "$chrome" ]; then echo "No Playwright Chromium under $browsers"; exit 1; fi
+          "$chrome" --version
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
 
       - name: Run Lighthouse CI - Collect
         id: lhci-collect

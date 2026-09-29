@@ -355,6 +355,7 @@ export class StampRepository {
     suffix?: StampSuffixFilter[];
     fileType?: StampFiletype[];
     creatorAddress?: string;
+    openDispensersOnly?: boolean;
   }) {
     const {
       type = STAMP_TYPE_CONSTANTS.STAMPS,
@@ -366,6 +367,7 @@ export class StampRepository {
       suffix = [],
       fileType = [],
       creatorAddress,
+      openDispensersOnly = false,
     } = options;
 
     // Combine filters
@@ -411,6 +413,12 @@ export class StampRepository {
       queryParams.push(creatorAddress);
     }
 
+    // Same condition as the listings data query, so a page of listings
+    // reports how many listings there are rather than how many stamps.
+    if (openDispensersOnly) {
+      whereConditions.push("smd.open_dispensers_count > 0");
+    }
+
     const whereClause =
       whereConditions.length > 0
         ? `WHERE ${whereConditions.join(" AND ")}`
@@ -426,6 +434,12 @@ export class StampRepository {
       joinClause = `
         JOIN collection_stamps cs1 ON st.stamp = cs1.stamp
         ${joinClause}
+      `;
+    }
+
+    if (openDispensersOnly) {
+      joinClause += `
+        LEFT JOIN stamp_market_data smd ON st.cpid = smd.cpid
       `;
     }
 
@@ -1020,8 +1034,10 @@ export class StampRepository {
         LEFT JOIN creator AS cr ON st.creator = cr.address
       `;
 
-      // Add market data join if needed for collections
-      if (hasMarketDataFilters) {
+      // Add market data join if needed for collections. The listings filter
+      // reads smd.open_dispensers_count, and this block replaced the join
+      // added for it above.
+      if (hasMarketDataFilters || hasListingsFilter) {
         joinClause += `
           LEFT JOIN stamp_market_data smd ON st.cpid = smd.cpid
         `;
@@ -1130,6 +1146,8 @@ export class StampRepository {
         ...(filterBy && { filterBy }),
         ...(suffix && { suffix }),
         ...(fileType && { fileType }),
+        ...(_market === "listings" && _dispensers &&
+          { openDispensersOnly: true }),
       });
       total = (totalResult as any).rows[0]?.total || 0;
       totalPages = noPagination ? 1 : Math.ceil(total / limit);
