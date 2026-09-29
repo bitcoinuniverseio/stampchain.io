@@ -144,6 +144,21 @@ export const createStampHandler = (
         const fileSizeMin = url.searchParams.get("fileSizeMin") || undefined;
         const fileSizeMax = url.searchParams.get("fileSizeMax") || undefined;
 
+        // Collection filter. An unrecognized id is rejected rather than
+        // ignored: ignoring it returned stamps from every collection.
+        const collectionParam = url.searchParams.get("collection_id") ??
+          url.searchParams.get("collectionId");
+        if (collectionParam && !/^[0-9a-f]{32}$/i.test(collectionParam)) {
+          return ApiResponseUtil.badRequest(
+            `Invalid collection id: ${collectionParam}. Must be 32 hex characters.`,
+            undefined,
+            { routeType: cacheType },
+          );
+        }
+        const collectionId = collectionParam
+          ? collectionParam.toUpperCase()
+          : undefined;
+
         // Extract type parameter (NEW: Support for stamp type filtering!)
         const typeParam = url.searchParams.get("type");
         const stampType =
@@ -153,6 +168,10 @@ export const createStampHandler = (
               | "cursed"
               | "posh"
               | "src20"
+            // Collection membership is the filter: "classic" would keep only
+            // ident STAMP and drop SRC-721 collections entirely.
+            : collectionId
+            ? "all"
             : "classic"; // Default to classic
 
         // Extract range filters
@@ -193,21 +212,6 @@ export const createStampHandler = (
         const maxCacheAgeMinutes = url.searchParams.get("maxCacheAgeMinutes") ||
           undefined;
         const priceSource = url.searchParams.get("priceSource") || undefined;
-
-        // Collection filter. An unrecognized id is rejected rather than
-        // ignored: ignoring it returned stamps from every collection.
-        const collectionParam = url.searchParams.get("collection_id") ??
-          url.searchParams.get("collectionId");
-        if (collectionParam && !/^[0-9a-f]{32}$/i.test(collectionParam)) {
-          return ApiResponseUtil.badRequest(
-            `Invalid collection id: ${collectionParam}. Must be 32 hex characters.`,
-            undefined,
-            { routeType: cacheType },
-          );
-        }
-        const collectionId = collectionParam
-          ? collectionParam.toUpperCase()
-          : undefined;
 
         // Check for timestamp parameters and validate if present
         const fromTimestamp = url.searchParams.get("from_timestamp");
