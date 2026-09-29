@@ -175,6 +175,32 @@ describe("StampRepository Unit Tests", () => {
     });
   });
 
+  describe("collection listings", () => {
+    it("joins market data and counts only open listings in one collection", async () => {
+      if (!mockDb) return;
+
+      await StampRepository.getStamps({
+        limit: 100,
+        page: 1,
+        collectionId: "D02FD9D57ED9E685609D14DD3795A7E2",
+        groupBy: "collection_id",
+        groupBySubquery: true,
+        market: "listings",
+        dispensers: true,
+      });
+
+      const [dataQuery, countQuery] = mockDb.getQueryHistory();
+      for (const query of [dataQuery, countQuery]) {
+        assertEquals(query.includes("JOIN collection_stamps cs1"), true);
+        assertEquals(
+          query.includes("LEFT JOIN stamp_market_data smd"),
+          true,
+        );
+        assertEquals(query.includes("smd.open_dispensers_count > 0"), true);
+      }
+    });
+  });
+
   describe("getTotalStampCountFromDb", () => {
     it("should return total count", async () => {
       // Skip if in RUN_DB_TESTS mode
