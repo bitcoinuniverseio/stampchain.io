@@ -57,6 +57,7 @@ jobs:
           echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
           
           echo "Waiting for server to start (extended timeout for CI)..."
+          # shellcheck disable=SC2016 # the inner shell expands the exported variables
           timeout 300 bash -c 'until curl -f http://localhost:8000/api/health 2>/dev/null; do echo "Still waiting for server..."; sleep 5; done'
           echo "Development server is ready"
 

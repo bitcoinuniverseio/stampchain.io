@@ -735,6 +735,8 @@ class DatabaseManager {
     const REDIS_CONNECTION_TIMEOUT = parseInt(serverConfig.REDIS_TIMEOUT);
     // Note: REDIS_DEBUG not used in this function - only used in cache operations
     const SKIP_REDIS_TLS = serverConfig.SKIP_REDIS_TLS; // Only skip if explicitly set to true
+    // Optional port override: CI service containers publish ephemeral host ports
+    const REDIS_PORT = Number(Deno.env.get("REDIS_PORT") || 6379);
     // Note: REDIS_MAX_RETRIES not used in this function - class uses this.#MAX_RETRIES from DB_MAX_RETRIES
 
     // Early console log to ensure we can see Redis connection attempts in logs
@@ -744,7 +746,7 @@ class DatabaseManager {
 
     try {
       // Log at the highest visibility level for production debugging
-      console.log(`[REDIS CONNECTION] Attempting Redis connection to ${this.config.ELASTICACHE_ENDPOINT}:6379`);
+      console.log(`[REDIS CONNECTION] Attempting Redis connection to ${this.config.ELASTICACHE_ENDPOINT}:${REDIS_PORT}`);
       console.log(`[REDIS CONNECTION] TLS=${!SKIP_REDIS_TLS}, TIMEOUT=${REDIS_CONNECTION_TIMEOUT}ms`);
 
       if (!this.config.ELASTICACHE_ENDPOINT) {
@@ -759,7 +761,7 @@ class DatabaseManager {
         const tcpStart = Date.now();
         const conn = await Deno.connect({
           hostname: this.config.ELASTICACHE_ENDPOINT,
-          port: 6379,
+          port: REDIS_PORT,
         });
         console.log(`[REDIS CONNECTION] TCP connection successful (${Date.now() - tcpStart}ms)`);
         conn.close();
@@ -771,7 +773,7 @@ class DatabaseManager {
       // JSR Redis client connection options
       const connectionOptions = {
         hostname: this.config.ELASTICACHE_ENDPOINT,
-        port: 6379,
+        port: REDIS_PORT,
         tls: !SKIP_REDIS_TLS,
         connectTimeout: REDIS_CONNECTION_TIMEOUT,
         retryStrategy: (times: number) => {
@@ -869,7 +871,7 @@ class DatabaseManager {
         this.#redisClient = undefined;
       }
 
-      console.log(`[REDIS RECONNECT] Attempting to reconnect to Redis at ${this.config.ELASTICACHE_ENDPOINT}:6379`);
+      console.log(`[REDIS RECONNECT] Attempting to reconnect to Redis at ${this.config.ELASTICACHE_ENDPOINT}:${Deno.env.get("REDIS_PORT") || 6379}`);
       await this.connectToRedis();
       console.log(`[REDIS RECONNECT SUCCESS] ✅ Successfully reconnected to Redis`);
       
