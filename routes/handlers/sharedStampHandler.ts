@@ -100,12 +100,19 @@ export const createStampHandler = (
           : undefined;
 
         // Extract new marketplace filters
-        const market = url.searchParams.get("market") as
-          | Extract<StampMarketplace, "listings" | "sales">
-          | "";
-        const dispensers = url.searchParams.get("dispensers") === "true";
+        // `listings=true` is how partner clients (StampDEX) ask for "only
+        // stamps with an open dispenser". It is not one of the price presets
+        // below, so without this it silently filtered nothing.
+        const listingsParam = url.searchParams.get("listings");
+        const openListingsOnly = listingsParam === "true";
+        const market =
+          (openListingsOnly ? "listings" : url.searchParams.get("market")) as
+            | Extract<StampMarketplace, "listings" | "sales">
+            | "";
+        const dispensers = openListingsOnly ||
+          url.searchParams.get("dispensers") === "true";
         const atomics = url.searchParams.get("atomics") === "true";
-        const listings = url.searchParams.get("listings") as
+        const listings = (openListingsOnly ? "" : listingsParam) as
           | Extract<
             StampMarketplace,
             "all" | "bargain" | "affordable" | "premium" | "custom"
@@ -136,6 +143,21 @@ export const createStampHandler = (
         const fileSizeMin = url.searchParams.get("fileSizeMin") || undefined;
         const fileSizeMax = url.searchParams.get("fileSizeMax") || undefined;
 
+        // Collection filter. An unrecognized id is rejected rather than
+        // ignored: ignoring it returned stamps from every collection.
+        const collectionParam = url.searchParams.get("collection_id") ??
+          url.searchParams.get("collectionId");
+        if (collectionParam && !/^[0-9a-f]{32}$/i.test(collectionParam)) {
+          return ApiResponseUtil.badRequest(
+            `Invalid collection id: ${collectionParam}. Must be 32 hex characters.`,
+            undefined,
+            { routeType: cacheType },
+          );
+        }
+        const collectionId = collectionParam
+          ? collectionParam.toUpperCase()
+          : undefined;
+
         // Extract type parameter (NEW: Support for stamp type filtering!)
         const typeParam = url.searchParams.get("type");
         const stampType =
@@ -145,6 +167,10 @@ export const createStampHandler = (
               | "cursed"
               | "posh"
               | "src20"
+            // Collection membership is the filter: "classic" would keep only
+            // ident STAMP and drop SRC-721 collections entirely.
+            : collectionId
+            ? "all"
             : "classic"; // Default to classic
 
         // Extract range filters
@@ -221,6 +247,7 @@ export const createStampHandler = (
           allColumns: false,
           skipTotalCount: false,
           ...(ident && { ident }),
+          ...(collectionId && { collectionId }),
           ...(fileType && { fileType }),
           ...(editions && { editions }),
           ...(market && { market }),
