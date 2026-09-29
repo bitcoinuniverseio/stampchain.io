@@ -100,12 +100,20 @@ export const createStampHandler = (
           : undefined;
 
         // Extract new marketplace filters
-        const market = url.searchParams.get("market") as
-          | Extract<StampMarketplace, "listings" | "sales">
-          | "";
-        const dispensers = url.searchParams.get("dispensers") === "true";
+        // `listings=true` is how partner clients (StampDEX) ask for "only
+        // stamps with an open dispenser". It is not one of the price presets
+        // below, so without this it silently filtered nothing.
+        const listingsParam = url.searchParams.get("listings");
+        const openListingsOnly = listingsParam === "true";
+        const market = (openListingsOnly
+          ? "listings"
+          : url.searchParams.get("market")) as
+            | Extract<StampMarketplace, "listings" | "sales">
+            | "";
+        const dispensers = openListingsOnly ||
+          url.searchParams.get("dispensers") === "true";
         const atomics = url.searchParams.get("atomics") === "true";
-        const listings = url.searchParams.get("listings") as
+        const listings = (openListingsOnly ? "" : listingsParam) as
           | Extract<
             StampMarketplace,
             "all" | "bargain" | "affordable" | "premium" | "custom"
@@ -186,6 +194,21 @@ export const createStampHandler = (
           undefined;
         const priceSource = url.searchParams.get("priceSource") || undefined;
 
+        // Collection filter. An unrecognized id is rejected rather than
+        // ignored: ignoring it returned stamps from every collection.
+        const collectionParam = url.searchParams.get("collection_id") ??
+          url.searchParams.get("collectionId");
+        if (collectionParam && !/^[0-9a-f]{32}$/i.test(collectionParam)) {
+          return ApiResponseUtil.badRequest(
+            `Invalid collection id: ${collectionParam}. Must be 32 hex characters.`,
+            undefined,
+            { routeType: cacheType },
+          );
+        }
+        const collectionId = collectionParam
+          ? collectionParam.toUpperCase()
+          : undefined;
+
         // Check for timestamp parameters and validate if present
         const fromTimestamp = url.searchParams.get("from_timestamp");
         const toTimestamp = url.searchParams.get("to_timestamp");
@@ -221,6 +244,7 @@ export const createStampHandler = (
           allColumns: false,
           skipTotalCount: false,
           ...(ident && { ident }),
+          ...(collectionId && { collectionId }),
           ...(fileType && { fileType }),
           ...(editions && { editions }),
           ...(market && { market }),
