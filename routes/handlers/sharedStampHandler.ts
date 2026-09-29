@@ -105,9 +105,8 @@ export const createStampHandler = (
         // below, so without this it silently filtered nothing.
         const listingsParam = url.searchParams.get("listings");
         const openListingsOnly = listingsParam === "true";
-        const market = (openListingsOnly
-          ? "listings"
-          : url.searchParams.get("market")) as
+        const market =
+          (openListingsOnly ? "listings" : url.searchParams.get("market")) as
             | Extract<StampMarketplace, "listings" | "sales">
             | "";
         const dispensers = openListingsOnly ||
