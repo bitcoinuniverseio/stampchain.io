@@ -63,7 +63,7 @@ jobs:
 
     steps:
       - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Resolve service container ports
         # Services publish ephemeral host ports so concurrent jobs on a shared self-hosted host never collide.
         run: |

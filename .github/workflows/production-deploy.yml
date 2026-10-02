@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Determine configuration
         id: config
         run: |
@@ -87,7 +87,7 @@ jobs:
 
     steps:
       - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -222,7 +222,7 @@ jobs:
 
     steps:
       - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -445,7 +445,7 @@ jobs:
 
     steps:
       - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Wait for new tasks to start serving
         # Allow time for ALB target registration + MySQL pool warmup before
         # probing. The previous 15s sat inside the ALB cutover window, so the
@@ -531,7 +531,7 @@ jobs:
 
     steps:
       - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -576,7 +576,7 @@ jobs:
 
     steps:
       - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Deployment result
         run: |
           BUILD_RESULT="${{ needs.build.result }}"
