@@ -33,6 +33,8 @@ jobs:
       is_weekend: ${{ steps.check.outputs.is_weekend }}
       day_of_week: ${{ steps.check.outputs.day_of_week }}
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Check if should run
         id: check
         run: |
@@ -86,6 +88,8 @@ jobs:
       FULL_ANALYSIS: ${{ github.event.inputs.full_analysis || 'false' }}
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Checkout code
         uses: actions/checkout@v7
         with:
@@ -395,6 +399,8 @@ jobs:
     if: always() && needs.check-schedule.outputs.should_run == 'true'
     
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -420,6 +426,8 @@ jobs:
     if: needs.check-schedule.outputs.day_of_week == '0' && needs.check-schedule.outputs.should_run == 'true'
     
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Checkout code
         uses: actions/checkout@v7
 

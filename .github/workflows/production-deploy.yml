@@ -47,6 +47,8 @@ jobs:
       version_tag: ${{ steps.config.outputs.version_tag }}
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Determine configuration
         id: config
         run: |
@@ -84,6 +86,8 @@ jobs:
       image_uri: ${{ steps.image.outputs.uri }}
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -217,6 +221,8 @@ jobs:
       previous_task_def: ${{ steps.snapshot.outputs.previous_arn }}
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -438,6 +444,8 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Wait for new tasks to start serving
         # Allow time for ALB target registration + MySQL pool warmup before
         # probing. The previous 15s sat inside the ALB cutover window, so the
@@ -522,6 +530,8 @@ jobs:
       contents: read
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -565,6 +575,8 @@ jobs:
     if: github.repository == 'stampchain-io/stampchain.io' && (always() && needs.pre-check.outputs.dry_run != 'true')
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Deployment result
         run: |
           BUILD_RESULT="${{ needs.build.result }}"

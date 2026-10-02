@@ -28,6 +28,8 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -59,6 +61,8 @@ jobs:
     needs: [production-gates]
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -125,6 +129,8 @@ jobs:
     continue-on-error: true
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -162,6 +168,8 @@ jobs:
     timeout-minutes: 20
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -224,6 +232,8 @@ jobs:
       BLOCKSTREAM_API_URL: http://localhost:18443/blockstream/api
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Resolve service container ports
         # Services publish ephemeral host ports so concurrent jobs on a shared self-hosted host never collide.
         run: |
@@ -291,6 +301,8 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -337,6 +349,8 @@ jobs:
       ]
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -397,6 +411,8 @@ jobs:
       ]
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Create failure summary
         run: |
           echo "## ❌ Production Validation Failed" >> $GITHUB_STEP_SUMMARY

@@ -60,6 +60,8 @@ jobs:
       PERPLEXITY_API_KEY: test-perplexity-key
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -486,6 +488,8 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -525,6 +529,8 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -630,6 +636,8 @@ jobs:
       BLOCKSTREAM_API_URL: http://localhost:18443/blockstream/api
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Resolve service container ports
         # Services publish ephemeral host ports so concurrent jobs on a shared self-hosted host never collide.
         run: |
@@ -1013,6 +1021,8 @@ jobs:
       issues: write
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Checkout code
         uses: actions/checkout@v7
 
