@@ -62,6 +62,8 @@ jobs:
       LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
     steps:
+      - name: Provide universe host tools
+        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@b11554bde3a933e23a7651654a930ad21ca8b369
       - name: Resolve service container ports
         # Services publish ephemeral host ports so concurrent jobs on a shared self-hosted host never collide.
         run: |
