@@ -7,7 +7,7 @@ on:
 jobs:
   quality-checks:
     name: Quality Checks
-    runs-on: [self-hosted, linux, x64, universe-super]
+    runs-on: [self-hosted, universe-runners-1]
     timeout-minutes: 15 # Prevent hanging jobs
 
     permissions:
