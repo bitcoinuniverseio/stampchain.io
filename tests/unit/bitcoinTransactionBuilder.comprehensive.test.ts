@@ -369,7 +369,7 @@ describe("BitcoinTransactionBuilder Comprehensive Coverage", () => {
             );
           },
           Error,
-          "Network mismatch: Cannot use testnet address",
+          "network mismatch",
         );
       });
     });
@@ -685,35 +685,16 @@ describe("BitcoinTransactionBuilder Comprehensive Coverage", () => {
       }
     });
 
-    it("should detect testnet for testnet addresses", () => {
-      // Mock bitcoin.payments.p2wpkh to not throw for testnet addresses
-      const originalP2wpkh = bitcoin.payments.p2wpkh;
-      bitcoin.payments.p2wpkh = (options: any) => {
-        if (
-          options.address?.startsWith("bc1q") &&
-          options.network?.bech32 === "bc"
-        ) {
-          throw new Error("Invalid for mainnet");
-        }
-        if (
-          options.address?.startsWith("tb1q") &&
-          options.network?.bech32 === "tb"
-        ) {
-          return { output: Buffer.from("0014", "hex") };
-        }
-        return originalP2wpkh(options);
-      };
-
-      try {
-        const network = getAddressNetwork.call(
-          BitcoinTransactionBuilder,
-          addressTestData.testnet.p2wpkh,
-        );
-        assertEquals(network.bech32, mockNetworks.testnet.bech32);
-        assertEquals(network.pubKeyHash, mockNetworks.testnet.pubKeyHash);
-      } finally {
-        bitcoin.payments.p2wpkh = originalP2wpkh;
-      }
+    it("should refuse testnet addresses on a Mainnet deployment (network profile)", () => {
+      assertThrows(
+        () =>
+          getAddressNetwork.call(
+            BitcoinTransactionBuilder,
+            addressTestData.testnet.p2wpkh,
+          ),
+        Error,
+        "Invalid Bitcoin address",
+      );
     });
 
     it("should throw error for invalid address", () => {

@@ -93,6 +93,11 @@ export function detectScriptType(
   if (input.startsWith("bc1")) return "P2WPKH";
   if (input.startsWith("3")) return "P2SH";
   if (input.startsWith("1")) return "P2PKH";
+  // Test-chain (Signet) encodings; their prefixes never overlap Mainnet's.
+  if (input.startsWith("tb1p")) return "P2TR";
+  if (input.startsWith("tb1")) return "P2WPKH";
+  if (input.startsWith("2")) return "P2SH";
+  if (input.startsWith("m") || input.startsWith("n")) return "P2PKH";
 
   return "P2WPKH"; // Default to P2WPKH
 }
@@ -138,9 +143,15 @@ export function validateWalletAddressForMinting(address: string): {
     };
   }
 
-  // Only allow P2PKH and P2WPKH addresses for minting
-  const p2pkhRegex = /^1[1-9A-HJ-NP-Za-km-z]{25,34}$/;
-  const bech32Regex = /^bc1q[0-9a-z]{38,59}$/;
+  // Only allow P2PKH and P2WPKH addresses of the configured network for minting
+  // (STAMPCHAIN_NETWORK; Signet uses the test-chain encodings m/n and tb1q).
+  const testChain = typeof Deno !== "undefined" &&
+    (Deno.env.get("STAMPCHAIN_NETWORK") || "mainnet").trim().toLowerCase() !==
+      "mainnet";
+  const p2pkhRegex = testChain
+    ? /^[mn][1-9A-HJ-NP-Za-km-z]{25,34}$/
+    : /^1[1-9A-HJ-NP-Za-km-z]{25,34}$/;
+  const bech32Regex = testChain ? /^tb1q[0-9a-z]{38,59}$/ : /^bc1q[0-9a-z]{38,59}$/;
 
   if (p2pkhRegex.test(address) || bech32Regex.test(address)) {
     return { isValid: true };
