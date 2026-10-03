@@ -1,5 +1,6 @@
 // lib/utils/minting/utils.ts
 
+import { bitcoinJsNetwork } from "$server/config/networkProfile.ts";
 import * as bitcoin from "bitcoinjs-lib";
 import type { Output } from "$types/index.d.ts";
 import { Buffer } from "node:buffer";
@@ -46,7 +47,7 @@ export function extractOutputs(tx: bitcoin.Transaction, address: string) {
         if (
           bitcoin.address.fromOutputScript(
             vout.script,
-            bitcoin.networks.bitcoin,
+            bitcoinJsNetwork(bitcoin.networks),
           ) !==
             address
         ) {

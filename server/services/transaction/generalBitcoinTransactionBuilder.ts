@@ -7,6 +7,7 @@
  * Supports: Mint, Fairmint, Detach, Dispense, and future operations
  */
 
+import { bitcoinJsNetwork } from "$server/config/networkProfile.ts";
 import { TX_CONSTANTS } from "$constants";
 import { hex2bin } from "$lib/utils/data/binary/baseUtils.ts";
 import { logger } from "$lib/utils/logger.ts";
@@ -85,7 +86,7 @@ export class GeneralBitcoinTransactionBuilder {
     let vouts: Array<{ value: number; address?: string; script?: Uint8Array }> = [];
 
     try {
-      psbt = new bitcoin.Psbt({ network: bitcoin.networks.bitcoin });
+      psbt = new bitcoin.Psbt({ network: bitcoinJsNetwork(bitcoin.networks) });
 
       // Parse the Counterparty raw transaction
       let txObj;

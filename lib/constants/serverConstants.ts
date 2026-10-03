@@ -95,8 +95,18 @@ export const DEFAULT_MARA_CONFIG: MaraConfig = {
 const _xcpApiUrl = typeof Deno !== "undefined"
   ? Deno.env.get("XCP_API_URL")
   : undefined;
+const _stampchainNetwork = typeof Deno !== "undefined"
+  ? (Deno.env.get("STAMPCHAIN_NETWORK") || "mainnet").trim().toLowerCase()
+  : "mainnet";
+// Off Mainnet the public Counterparty node is never a fallback: without its own
+// XCP_API_URL a non-Mainnet deployment has no Counterparty node (fail closed).
 export const XCP_V2_NODES: ReadonlyArray<{ name: string; url: string }> =
-  _xcpApiUrl ? [{ name: "mock", url: _xcpApiUrl }] : [
+  _xcpApiUrl
+    ? [{
+      name: _stampchainNetwork === "mainnet" ? "mock" : "counterparty-self-hosted",
+      url: _xcpApiUrl,
+    }]
+    : _stampchainNetwork !== "mainnet" ? [] : [
     {
       name: "counterparty.io",
       url: "https://api.counterparty.io:4000/v2",

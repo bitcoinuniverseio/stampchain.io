@@ -1,5 +1,6 @@
 // was previously // lib/utils/minting/src20/tx.ts
 
+import { bitcoinJsNetwork } from "$server/config/networkProfile.ts";
 import * as bitcoin from "bitcoinjs-lib";
 // Conditionally import tiny-secp256k1
 let ecc: any = null;
@@ -89,9 +90,12 @@ export class SRC20MultisigPSBTService {
   }: IPrepareSRC20TX) {
     try {
       logger.info("src20", { message: "Starting preparePSBT for Multisig SRC20" });
-      const psbtNetwork = network === "testnet"
-        ? bitcoin.networks.testnet
-        : bitcoin.networks.bitcoin;
+      // The deployment's network profile decides the chain; a caller-supplied
+      // label never selects a different one.
+      const psbtNetwork = bitcoinJsNetwork(bitcoin.networks);
+      if (network && network !== "mainnet" && network !== "testnet") {
+        throw new Error(`Unsupported network ${network}`);
+      }
       logger.debug("src20", { message: "Using network", network: psbtNetwork });
 
       const psbt = new bitcoin.Psbt({ network: psbtNetwork });
