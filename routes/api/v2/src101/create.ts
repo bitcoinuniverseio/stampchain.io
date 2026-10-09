@@ -118,6 +118,9 @@ export const handler: Handlers = {
             | "setrecord"
             | "renew",
           {
+            // The operation's own fields (name, rec, pri, hash, tokenid, ...)
+            // are what validateDeploy / validateMint check.
+            ...body,
             op: body.op,
             feeRate: body.feeRate,
             toAddress: body.toAddress,

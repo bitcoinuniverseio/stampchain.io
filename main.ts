@@ -55,6 +55,23 @@ if (DENO_ROLE !== "web") {
 }
 
 if (import.meta.main) {
+  if (!Deno.args.includes("build")) {
+    // Resolve the network profile and, off Mainnet, prove Bitcoin Core and
+    // Counterparty serve the configured chain before serving anything.
+    try {
+      const { getNetworkProfile, verifyNetworkIdentity } = await import(
+        "$server/config/networkProfile.ts"
+      );
+      const profile = getNetworkProfile();
+      await verifyNetworkIdentity(profile);
+      console.log(`[MAIN] Network profile: ${profile.name}`);
+    } catch (e) {
+      console.error(
+        `[MAIN ERROR] Network profile check failed: ${e instanceof Error ? e.message : String(e)}`,
+      );
+      Deno.exit(1);
+    }
+  }
   if (!Deno.args.includes("build") && DENO_ROLE !== "web") {
     try {
       console.log(`[MAIN] Attempting dbManager.initialize() at ${Date.now()}`);
@@ -89,7 +106,9 @@ if (import.meta.main) {
   } else {
     console.log(`[MAIN] Entering runtime block at ${Date.now()}`);
     if (!serverConfig.IS_DEVELOPMENT) {}
-    await start(manifest, config);
+    // HOSTNAME restricts the listener (e.g. 127.0.0.1); unset keeps Fresh's default.
+    const hostname = Deno.env.get("HOSTNAME");
+    await start(manifest, hostname ? { ...config, hostname } : config);
     console.log(`[MAIN] Server started at ${Date.now()}`);
   }
 }

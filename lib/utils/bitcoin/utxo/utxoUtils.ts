@@ -1,4 +1,9 @@
 import type { UTXO } from "$types/index.d.ts";
+import {
+  bitcoinJsNetwork,
+  isMainnetProfile,
+} from "$server/config/networkProfile.ts";
+import * as bitcoinjs from "bitcoinjs-lib";
 import { decodeBase58 } from "@std/encoding/base58";
 import {
   detectScriptType,
@@ -258,6 +263,21 @@ function isValidScript(script: string): boolean {
 
 // Update script construction for all address types
 function constructScriptFromAddress(address: string): string | null {
+  if (!isMainnetProfile()) {
+    // Off Mainnet the script is derived only for an address of the deployment's
+    // own chain (fail closed on any other network's address).
+    try {
+      const script = bitcoinjs.address.toOutputScript(
+        address,
+        bitcoinJsNetwork(bitcoinjs.networks),
+      );
+      return Array.from(script).map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    } catch (error) {
+      console.warn("Address is not on this deployment's network:", error);
+      return null;
+    }
+  }
   try {
     console.log("Constructing script for address:", address);
     const scriptType = detectScriptType(address);
@@ -663,5 +683,12 @@ Retries: ${retries}
   ];
 
   console.log(`>>> Starting tryAPIs with ${endpoints.length} endpoints`);
-  return await tryAPIs(endpoints, retries);
+  // Off Mainnet only the deployment's own esplora (MEMPOOL_API_URL /
+  // BLOCKSTREAM_API_URL) answers; blockchain.info and BlockCypher serve Mainnet.
+  const allowed = isMainnetProfile()
+    ? endpoints
+    : endpoints.filter((e) =>
+      e.name === "mempool.space" || e.name === "blockstream.info"
+    );
+  return await tryAPIs(allowed, retries);
 }

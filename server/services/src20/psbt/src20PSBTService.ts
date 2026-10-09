@@ -1,3 +1,5 @@
+import { olgaNetworkName } from "$server/config/networkProfile.ts";
+import { bitcoinJsNetwork } from "$server/config/networkProfile.ts";
 import { FileToAddressUtils } from "$lib/utils/bitcoin/encoding/fileToAddressUtils.ts";
 import type { AncestorInfo } from "$types/base.d.ts";
 import type { PSBTInput } from "$types/src20.d.ts";
@@ -68,7 +70,7 @@ export class SRC20PSBTService {
     });
     try {
       const effectiveChangeAddress = changeAddress || sourceAddress;
-      const network = networks.bitcoin;
+      const network = bitcoinJsNetwork(networks);
 
       const { chunks } = await this.prepareActionData(src20Action);
 
@@ -280,7 +282,7 @@ export class SRC20PSBTService {
       });
 
       // Let FileToAddressUtils handle length prefix and chunking
-      const cip33Addresses = FileToAddressUtils.fileToAddresses(hex_data);
+      const cip33Addresses = FileToAddressUtils.fileToAddresses(hex_data, olgaNetworkName());
       if (!cip33Addresses || cip33Addresses.length === 0) {
         throw new Error("Failed to generate CIP33 addresses");
       }

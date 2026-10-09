@@ -43,7 +43,7 @@ on:
 jobs:
   newman-comprehensive:
     name: Newman Integration Tests (Database Required)
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: ${{ contains(fromJSON('["push","schedule","workflow_dispatch"]'), github.event_name) && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && fromJSON('["self-hosted","universe-runners-1"]') || 'ubuntu-24.04' }}
     timeout-minutes: 30
     
     permissions:
@@ -60,8 +60,6 @@ jobs:
       PERPLEXITY_API_KEY: test-perplexity-key
 
     steps:
-      - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -483,13 +481,11 @@ jobs:
 
   pagination-validation:
     name: Pagination & Data Validation Tests
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: ${{ contains(fromJSON('["push","schedule","workflow_dispatch"]'), github.event_name) && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && fromJSON('["self-hosted","universe-runners-1"]') || 'ubuntu-24.04' }}
     timeout-minutes: 20
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     
     steps:
-      - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -524,13 +520,11 @@ jobs:
 
   performance-benchmark:
     name: API Performance Benchmarking
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: ${{ contains(fromJSON('["push","schedule","workflow_dispatch"]'), github.event_name) && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && fromJSON('["self-hosted","universe-runners-1"]') || 'ubuntu-24.04' }}
     timeout-minutes: 20
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     
     steps:
-      - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -581,7 +575,7 @@ jobs:
 
   newman-local-dev:
     name: Newman Tests - Local Dev Server
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: ${{ contains(fromJSON('["push","schedule","workflow_dispatch"]'), github.event_name) && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && fromJSON('["self-hosted","universe-runners-1"]') || 'ubuntu-24.04' }}
     timeout-minutes: 20
     if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
 
@@ -600,7 +594,6 @@ jobs:
           - 3306
         options: >-
           --health-cmd="mysqladmin ping"
-          --health-start-period=120s
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -637,8 +630,6 @@ jobs:
       BLOCKSTREAM_API_URL: http://localhost:18443/blockstream/api
 
     steps:
-      - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Resolve service container ports
         # Services publish ephemeral host ports so concurrent jobs on a shared self-hosted host never collide.
         run: |
@@ -1010,7 +1001,7 @@ jobs:
 
   schema-contract-tests:
     name: Schema Contract Tests - Production Monitor
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: ${{ contains(fromJSON('["push","schedule","workflow_dispatch"]'), github.event_name) && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && fromJSON('["self-hosted","universe-runners-1"]') || 'ubuntu-24.04' }}
     timeout-minutes: 10
     # Production monitoring only — schema contracts are validated against local dev
     # in the newman-local-dev job. This job monitors production for regressions.
@@ -1022,8 +1013,6 @@ jobs:
       issues: write
 
     steps:
-      - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Checkout code
         uses: actions/checkout@v7
 

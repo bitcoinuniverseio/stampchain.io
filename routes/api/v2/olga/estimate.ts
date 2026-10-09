@@ -1,3 +1,4 @@
+import { olgaNetworkName } from "$server/config/networkProfile.ts";
 import { TX_CONSTANTS } from "$constants";
 import { Handlers } from "$fresh/server.ts";
 import { ApiResponseUtil } from "$lib/utils/api/responses/apiResponseUtil.ts";
@@ -82,7 +83,7 @@ export const handler: Handlers = {
       // Parse file and calculate CIP33 addresses
       const fileSize = Math.ceil((body.file.length * 3) / 4);
       const hex_file = base64ToHex(body.file);
-      const cip33Addresses = FileToAddressUtils.fileToAddresses(hex_file);
+      const cip33Addresses = FileToAddressUtils.fileToAddresses(hex_file, olgaNetworkName());
 
       logger.debug("stamps", {
         message: "File analysis for estimation",

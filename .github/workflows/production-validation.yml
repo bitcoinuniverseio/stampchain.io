@@ -24,12 +24,10 @@ env:
 jobs:
   production-gates:
     name: Production Readiness Gates
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: ${{ contains(fromJSON('["push","schedule","workflow_dispatch"]'), github.event_name) && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && fromJSON('["self-hosted","universe-runners-1"]') || 'ubuntu-24.04' }}
     timeout-minutes: 30
 
     steps:
-      - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -56,13 +54,11 @@ jobs:
   # Task 36 - Performance Benchmarking
   performance-benchmarking:
     name: Performance Benchmarking
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: ${{ contains(fromJSON('["push","schedule","workflow_dispatch"]'), github.event_name) && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && fromJSON('["self-hosted","universe-runners-1"]') || 'ubuntu-24.04' }}
     timeout-minutes: 45
     needs: [production-gates]
 
     steps:
-      - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -123,14 +119,12 @@ jobs:
   # a full build environment not available in CI. Non-blocking until fixed.
   cross-module-integration:
     name: Cross-Module Integration Testing
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: ${{ contains(fromJSON('["push","schedule","workflow_dispatch"]'), github.event_name) && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && fromJSON('["self-hosted","universe-runners-1"]') || 'ubuntu-24.04' }}
     timeout-minutes: 60
     needs: [production-gates]
     continue-on-error: true
 
     steps:
-      - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -164,12 +158,10 @@ jobs:
   # Dependency Health Check
   dependency-health:
     name: Dependency Health Check
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: ${{ contains(fromJSON('["push","schedule","workflow_dispatch"]'), github.event_name) && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && fromJSON('["self-hosted","universe-runners-1"]') || 'ubuntu-24.04' }}
     timeout-minutes: 20
 
     steps:
-      - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -188,7 +180,7 @@ jobs:
   # Rollback Testing
   rollback-testing:
     name: Rollback Procedure Testing
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: ${{ contains(fromJSON('["push","schedule","workflow_dispatch"]'), github.event_name) && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && fromJSON('["self-hosted","universe-runners-1"]') || 'ubuntu-24.04' }}
     timeout-minutes: 25
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
 
@@ -202,7 +194,6 @@ jobs:
           - 3306
         options: >-
           --health-cmd="mysqladmin ping"
-          --health-start-period=120s
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -233,8 +224,6 @@ jobs:
       BLOCKSTREAM_API_URL: http://localhost:18443/blockstream/api
 
     steps:
-      - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Resolve service container ports
         # Services publish ephemeral host ports so concurrent jobs on a shared self-hosted host never collide.
         run: |
@@ -298,12 +287,10 @@ jobs:
   # Security and Compliance
   security-validation:
     name: Security Validation
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: ${{ contains(fromJSON('["push","schedule","workflow_dispatch"]'), github.event_name) && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && fromJSON('["self-hosted","universe-runners-1"]') || 'ubuntu-24.04' }}
     timeout-minutes: 15
 
     steps:
-      - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -336,7 +323,7 @@ jobs:
   # Comprehensive Validation (for main branch)
   comprehensive-validation:
     name: Comprehensive Validation
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: ${{ contains(fromJSON('["push","schedule","workflow_dispatch"]'), github.event_name) && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && fromJSON('["self-hosted","universe-runners-1"]') || 'ubuntu-24.04' }}
     timeout-minutes: 90
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs:
@@ -350,8 +337,6 @@ jobs:
       ]
 
     steps:
-      - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -399,7 +384,7 @@ jobs:
   # Notification on failure
   notify-failure:
     name: Notify on Failure
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: ${{ contains(fromJSON('["push","schedule","workflow_dispatch"]'), github.event_name) && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && fromJSON('["self-hosted","universe-runners-1"]') || 'ubuntu-24.04' }}
     if: failure()
     needs:
       [
@@ -412,8 +397,6 @@ jobs:
       ]
 
     steps:
-      - name: Provide universe host tools
-        uses: bitcoinuniverseio/universe-ci-actions/universe-host-tools@c9bb29ab2b39ea95dcc430fda80416deb2c4eb85
       - name: Create failure summary
         run: |
           echo "## ❌ Production Validation Failed" >> $GITHUB_STEP_SUMMARY

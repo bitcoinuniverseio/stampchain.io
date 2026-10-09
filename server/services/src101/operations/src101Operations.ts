@@ -59,7 +59,9 @@ export class SRC101OperationService {
         prim,
         coef,
         sig,
-        img, 
+        // img is optional (SRC-101 image-optional activation): omit it rather
+        // than inscribing `"img": null`, which the indexer rejects as an invalid list.
+        ...(Array.isArray(img) && img.length > 0 ? { img } : {}),
       }),
       async ({ hash, tokenid }) => {
         const mintInfo = await SRC101Service.UtilityService.getSrc101Owner(hash, tokenid);
