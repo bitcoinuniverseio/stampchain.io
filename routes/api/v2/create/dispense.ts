@@ -1,4 +1,5 @@
 // routes/api/v2/dispense.ts
+import { bitcoinJsNetwork } from "$server/config/networkProfile.ts";
 import { TX_CONSTANTS } from "$constants";
 import { Handlers } from "$fresh/server.ts";
 import { ApiResponseUtil } from "$lib/utils/api/responses/apiResponseUtil.ts";
@@ -159,7 +160,7 @@ export const handler: Handlers = {
           Psbt,
           Transaction,
         } = await import("bitcoinjs-lib");
-        const network = networks.bitcoin;
+        const network = bitcoinJsNetwork(networks);
 
         const cpTx = Transaction.fromHex(counterpartyTxHex);
 

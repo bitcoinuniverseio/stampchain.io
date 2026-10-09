@@ -1,4 +1,5 @@
 // routes/api/v2/create/send.ts
+import { bitcoinJsNetwork } from "$server/config/networkProfile.ts";
 import { Handlers } from "$fresh/server.ts";
 import { ApiResponseUtil } from "$lib/utils/api/responses/apiResponseUtil.ts";
 import { logger } from "$lib/utils/logger.ts";
@@ -38,7 +39,7 @@ export const handler: Handlers<SendResponse | { error: string }> = {
         dryRun,
       } = body;
       const isEffectivelyDryRun = dryRun === true;
-      const network = networks.bitcoin;
+      const network = bitcoinJsNetwork(networks);
 
       if (!address) {
         return ApiResponseUtil.badRequest("Missing required field: address");

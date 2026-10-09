@@ -120,14 +120,16 @@ export class SRC101TransactionService {
     return {
       toaddress: body.toaddress ?? "",
       hash: body.hash ?? "",
-      tokenid: Array.isArray(body.tokenid) ? body.tokenid[0] ?? "" : body.tokenid ?? "",
+      // SRC-101: tokenid is always a list of base64 names (btc_stamps docs/PROTOCOLS.md).
+      tokenid: (Array.isArray(body.tokenid) ? body.tokenid : [body.tokenid ?? ""]) as unknown as string,
     };
   }
 
   private static prepareSetrecord(body: SRC101InputData): Omit<ISetrecordSRC101, "network" | "changeAddress" | "sourceAddress" | "recAddress" | "feeRate"> {
     return {
       hash: body.hash ?? "",
-      tokenid: Array.isArray(body.tokenid) ? body.tokenid[0] ?? "" : body.tokenid ?? "",
+      // SRC-101: tokenid is always a list of base64 names (btc_stamps docs/PROTOCOLS.md).
+      tokenid: (Array.isArray(body.tokenid) ? body.tokenid : [body.tokenid ?? ""]) as unknown as string,
       type: body.type ?? "",
       data: body.data ?? {},
       prim: body.prim ?? "",
@@ -137,7 +139,8 @@ export class SRC101TransactionService {
   private static prepareRenew(body: SRC101InputData): Omit<IRenewSRC101, "network" | "changeAddress" | "sourceAddress" | "recAddress" | "feeRate"> {
     return {
       hash: body.hash ?? "",
-      tokenid: Array.isArray(body.tokenid) ? body.tokenid[0] ?? "" : body.tokenid ?? "",
+      // SRC-101: tokenid is always a list of base64 names (btc_stamps docs/PROTOCOLS.md).
+      tokenid: (Array.isArray(body.tokenid) ? body.tokenid : [body.tokenid ?? ""]) as unknown as string,
       dua: body.dua?.toString() ?? "",
     };
   }
