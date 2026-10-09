@@ -42,12 +42,32 @@ import { StampClassification } from "$constants";
  * Bitcoin address validation patterns
  * Compiled once for performance
  */
-const BITCOIN_ADDRESS_PATTERNS = {
+const MAINNET_ADDRESS_PATTERNS = {
   P2PKH: /^1[a-km-zA-HJ-NP-Z1-9]{25,33}$/,
   P2SH: /^3[a-km-zA-HJ-NP-Z1-9]{25,33}$/,
   P2WPKH: /^bc1q[a-z0-9]{38,58}$/,
   P2TR: /^bc1p[a-z0-9]{58}$/,
 } as const;
+
+/** Signet shares the test-chain address encoding (m/n, 2, tb1q, tb1p). */
+const TEST_CHAIN_ADDRESS_PATTERNS = {
+  P2PKH: /^[mn][a-km-zA-HJ-NP-Z1-9]{25,33}$/,
+  P2SH: /^2[a-km-zA-HJ-NP-Z1-9]{25,34}$/,
+  P2WPKH: /^tb1q[a-z0-9]{38,58}$/,
+  P2TR: /^tb1p[a-z0-9]{58}$/,
+} as const;
+
+/**
+ * A server process accepts only the addresses of its configured network
+ * (STAMPCHAIN_NETWORK, see server/config/networkProfile.ts); browser bundles
+ * keep the Mainnet patterns.
+ */
+const CONFIGURED_NETWORK = typeof Deno !== "undefined"
+  ? (Deno.env.get("STAMPCHAIN_NETWORK") || "mainnet").trim().toLowerCase()
+  : "mainnet";
+const BITCOIN_ADDRESS_PATTERNS = CONFIGURED_NETWORK === "mainnet"
+  ? MAINNET_ADDRESS_PATTERNS
+  : TEST_CHAIN_ADDRESS_PATTERNS;
 
 /**
  * Bitcoin script patterns for hex validation
