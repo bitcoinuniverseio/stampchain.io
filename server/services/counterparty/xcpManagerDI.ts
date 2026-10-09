@@ -3,7 +3,7 @@
  * Enables better testing, flexibility, and maintainability
  */
 
-import { SATS_PER_KB_MULTIPLIER } from "$constants";
+import { SATS_PER_KB_MULTIPLIER, XCP_V2_NODES } from "$constants";
 import type { CacheService } from "$server/interfaces/cacheService.ts";
 import type { HttpClient } from "$server/interfaces/httpClient.ts";
 import type { XcpBalance } from "$types/services.d.ts";
@@ -125,16 +125,8 @@ export interface IssuanceOptions {
 
 // Default configuration
 const DEFAULT_CONFIG: Partial<CounterpartyApiManagerConfig> = {
-  nodes: [
-    {
-      name: "counterparty.io",
-      url: "https://api.counterparty.io:4000/v2",
-    },
-    {
-      name: "dev.counterparty.io",
-      url: "https://api.counterparty.io:4000/v2",
-    },
-  ],
+  // Same node list as the rest of the server (self-hosted XCP_API_URL off Mainnet).
+  nodes: XCP_V2_NODES.map((node) => ({ ...node })),
   defaultCacheTimeout: 300, // 5 minutes
   maxRetries: 3,
   retryDelay: 1000,

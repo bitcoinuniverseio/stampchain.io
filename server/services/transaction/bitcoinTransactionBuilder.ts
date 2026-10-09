@@ -6,6 +6,7 @@ import { getUTXOForAddress as getUTXOForAddressFromUtils } from "$lib/utils/bitc
 import { bytesToHex, hex2bin } from "$lib/utils/data/binary/baseUtils.ts";
 import { logger } from "$lib/utils/logger.ts";
 import { CommonUTXOService } from "$server/services/utxo/commonUtxoService.ts";
+import { bitcoinJsNetwork } from "$server/config/networkProfile.ts";
 import * as bitcoin from "bitcoinjs-lib";
 import { Buffer } from "node:buffer";
 const { Psbt, Transaction, payments, networks, address: bjsAddress } = bitcoin;
@@ -74,11 +75,11 @@ export class BitcoinTransactionBuilderImpl {
 
     // Validate network consistency - UTXO and address must be on same network
     if (txInfo && 'utxo' in txInfo && txInfo.utxo) {
-      // For mainnet UTXOs, ensure we're not using testnet addresses
-      const isTestnetAddress = sellerAddress.startsWith('tb1') || sellerAddress.startsWith('2') ||
-                              sellerAddress.startsWith('m') || sellerAddress.startsWith('n');
-      if (isTestnetAddress) {
-        throw new Error(`Network mismatch: Cannot use testnet address ${sellerAddress} with mainnet UTXO`);
+      // The seller address must belong to the deployment's chain.
+      try {
+        this.bitcoin.address.toOutputScript(sellerAddress, bitcoinJsNetwork(this.bitcoin.networks));
+      } catch {
+        throw new Error(`Invalid address or network mismatch: ${sellerAddress} is not an address of this deployment's network`);
       }
     }
 
@@ -205,26 +206,16 @@ export class BitcoinTransactionBuilderImpl {
   // Helper methods
 
   private getAddressNetwork(address: string): any {
-    // Check for testnet prefixes
-    if (address.startsWith('tb1') || address.startsWith('2') ||
-        address.startsWith('m') || address.startsWith('n')) {
-      try {
-        this.bitcoin.address.toOutputScript(address, this.bitcoin.networks.testnet);
-        return this.bitcoin.networks.testnet;
-      } catch {
-        // Fall through to mainnet
-      }
-    }
-
-    // Default to mainnet
+    // Only the deployment's network is accepted (fail closed on any other chain).
+    const network = bitcoinJsNetwork(this.bitcoin.networks);
     try {
-      this.bitcoin.address.toOutputScript(address, this.bitcoin.networks.bitcoin);
-      return this.bitcoin.networks.bitcoin;
+      this.bitcoin.address.toOutputScript(address, network);
+      return network;
     } catch (_error) {
-      // Throw error for invalid addresses or network mismatch
       throw new Error(`Invalid address or network mismatch: ${address}`);
     }
   }
+
 
 
   // Simplified version of processCounterpartyPSBT for testing
@@ -452,18 +443,16 @@ export class BitcoinTransactionBuilder {
   }
 
   private static getAddressNetwork(btcAddress: string) {
+    // Only the deployment's network is accepted (fail closed on any other chain).
+    const network = bitcoinJsNetwork(networks);
     try {
-      payments.p2wpkh({ address: btcAddress, network: networks.bitcoin });
-      return networks.bitcoin;
+      payments.p2wpkh({ address: btcAddress, network });
+      return network;
     } catch {
-      try {
-        payments.p2wpkh({ address: btcAddress, network: networks.testnet });
-        return networks.testnet;
-      } catch {
-        throw new Error("Invalid Bitcoin address");
-      }
+      throw new Error("Invalid Bitcoin address");
     }
   }
+
 
   private static getAddressFromScript(script: Uint8Array, network: typeof networks.bitcoin): string {
     try {
@@ -922,7 +911,7 @@ export class BitcoinTransactionBuilder {
     );
     console.log("  Options:", options);
 
-    const network = networks.bitcoin;
+    const network = bitcoinJsNetwork(networks);
     const psbt = new Psbt({ network });
     const inputsToSign: { index: number; address?: string; sighashTypes?: number[] }[] = [];
 

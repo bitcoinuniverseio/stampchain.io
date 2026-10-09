@@ -1,3 +1,4 @@
+import { bitcoinJsNetwork } from "$server/config/networkProfile.ts";
 import { TX_CONSTANTS } from "$constants";
 import { Handlers } from "$fresh/server.ts";
 import { ApiResponseUtil } from "$lib/utils/api/responses/apiResponseUtil.ts";
@@ -55,7 +56,7 @@ export const handler: Handlers = {
       });
 
       const { address, identifier, quantity, inputs_set, options } = body;
-      const network = networks.bitcoin; // Or determine from address
+      const network = bitcoinJsNetwork(networks); // the deployment network profile
 
       // Prepare args for normalizeFeeRate carefully due to exactOptionalPropertyTypes
       const feeArgs: { satsPerKB?: number; satsPerVB?: number } = {};

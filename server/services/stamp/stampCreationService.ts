@@ -1,5 +1,7 @@
 // was previously // lib/utils/minting/stamp.ts
 
+import { olgaNetworkName } from "$server/config/networkProfile.ts";
+import { bitcoinJsNetwork } from "$server/config/networkProfile.ts";
 import { base64ToHex } from "$lib/utils/data/binary/baseUtils.ts";
 import { FileToAddressUtils } from "$lib/utils/bitcoin/encoding/fileToAddressUtils.ts";
 import { estimateMintingTransactionSize } from "$lib/utils/bitcoin/minting/transactionSizes.ts";
@@ -121,7 +123,7 @@ export class StampCreationService {
       const qtyNumber = typeof qty === 'string' ? parseInt(qty, 10) : qty;
 
       const hex_file = base64ToHex(file);
-      const cip33Addresses = FileToAddressUtils.fileToAddresses(hex_file) as string[];
+      const cip33Addresses = FileToAddressUtils.fileToAddresses(hex_file, olgaNetworkName()) as string[];
       const fileSize = Math.ceil((file.length * 3) / 4);
       logger.debug("stamp-create", { message: "File and CIP33 details", fileSize, cip33AddressCount: cip33Addresses.length, hex_length: hex_file.length });
 
@@ -365,7 +367,7 @@ export class StampCreationService {
         });
 
         return {
-          psbt: new bitcoin.Psbt({ network: bitcoin.networks.bitcoin }), // Empty PSBT for dryRun
+          psbt: new bitcoin.Psbt({ network: bitcoinJsNetwork(bitcoin.networks) }), // Empty PSBT for dryRun
           inputs: selectedUTXOs.map(utxo => ({
             txid: utxo.txid,
             vout: utxo.vout,
@@ -385,7 +387,7 @@ export class StampCreationService {
         };
       }
 
-      psbt = new bitcoin.Psbt({ network: bitcoin.networks.bitcoin });
+      psbt = new bitcoin.Psbt({ network: bitcoinJsNetwork(bitcoin.networks) });
 
       // Parse the transaction - handle potential issues with XCP transactions
       let txObj;
@@ -902,7 +904,7 @@ export class StampCreationService {
       // together: we select precisely in order to compose against that set.
       const issuanceDustValue = outputValue ?? TX_CONSTANTS.DUST_SIZE;
       const issuanceCip33Addresses = cip33Addresses ??
-        (FileToAddressUtils.fileToAddresses(base64ToHex(file)) as string[]);
+        (FileToAddressUtils.fileToAddresses(base64ToHex(file), olgaNetworkName()) as string[]);
       const selected = await this.selectIssuanceInputs(
         sourceWallet,
         issuanceCip33Addresses,

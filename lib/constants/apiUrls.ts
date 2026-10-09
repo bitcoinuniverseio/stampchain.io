@@ -20,8 +20,13 @@ export const MEMPOOL_API_BASE_URL = _mempoolUrl || "https://mempool.space/api";
 const _blockstreamUrl = typeof Deno !== "undefined"
   ? Deno.env.get("BLOCKSTREAM_API_URL")
   : undefined;
+const _stampchainNetwork = typeof Deno !== "undefined"
+  ? (Deno.env.get("STAMPCHAIN_NETWORK") || "mainnet").trim().toLowerCase()
+  : "mainnet";
+// Off Mainnet the esplora fallback is the deployment's own esplora (MEMPOOL_API_URL),
+// never the public Mainnet blockstream.info.
 export const BLOCKSTREAM_API_BASE_URL = _blockstreamUrl ||
-  "https://blockstream.info/api";
+  (_stampchainNetwork === "mainnet" ? "https://blockstream.info/api" : _mempoolUrl || "");
 
 /** CoinGecko API for cryptocurrency price data */
 export const COINGECKO_API_BASE_URL = "https://api.coingecko.com/api/v3";

@@ -1,3 +1,4 @@
+import { bitcoinJsNetwork } from "$server/config/networkProfile.ts";
 import { TX_CONSTANTS } from "$constants";
 import { Handlers } from "$fresh/server.ts";
 import { ResponseUtil } from "$lib/utils/api/responses/responseUtil.ts";
@@ -147,7 +148,7 @@ export const handler: Handlers = {
           Psbt,
           Transaction,
         } = await import("bitcoinjs-lib");
-        const network = networks.bitcoin;
+        const network = bitcoinJsNetwork(networks);
 
         const rawCpTxHex = response.result.rawtransaction;
         const cpTx = Transaction.fromHex(rawCpTxHex);

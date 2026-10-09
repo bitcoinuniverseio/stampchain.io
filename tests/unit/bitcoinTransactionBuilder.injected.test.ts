@@ -541,7 +541,7 @@ describe("BitcoinTransactionBuilder with Dependency Injection and Fixtures", {
           );
         },
         Error,
-        "Network mismatch: Cannot use testnet address",
+        "network mismatch",
       );
     });
 

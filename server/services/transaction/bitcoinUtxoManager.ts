@@ -1,3 +1,4 @@
+import { bitcoinJsNetwork } from "$server/config/networkProfile.ts";
 import { logger } from "$lib/utils/logger.ts";
 import { CounterpartyApiManager } from "$server/services/counterpartyApiService.ts";
 import { CommonUTXOService } from "$server/services/utxo/commonUtxoService.ts";
@@ -92,7 +93,7 @@ export class BitcoinUtxoManager {
       scriptSize = (output as any).script.length / 2;
     } else if ((output as any).address) {
       try {
-        const outputScript = bitcoin.address.toOutputScript((output as any).address, bitcoin.networks.bitcoin);
+        const outputScript = bitcoin.address.toOutputScript((output as any).address, bitcoinJsNetwork(bitcoin.networks));
         scriptSize = outputScript.length;
       } catch (e) {
         logger.warn("transaction-utxo-service", { message: "Could not determine script size for address", address: (output as any).address, error: (e as any).message });
