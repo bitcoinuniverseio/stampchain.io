@@ -34,9 +34,45 @@ import config from "$/fresh.config.ts";
 import manifest from "$/fresh.gen.ts";
 import "$/globals.d.ts";
 import build from "$fresh/dev.ts";
-import { start } from "$fresh/server.ts";
+import { createHandler } from "$fresh/server.ts";
 import { serverConfig } from "$server/config/config.ts";
+import { ApplicationLifecycle } from "$server/lifecycle/applicationLifecycle.ts";
+import { applicationWork } from "$server/lifecycle/workDrain.ts";
+import {
+  nativeReaderRequested,
+  nativeReaderSettings,
+  verifyNativeReaderProfile,
+} from "$server/database/nativeReaderProfile.ts";
+import { watchNativeReaderLease } from "$server/database/nativeReaderLease.ts";
 const DENO_ROLE = serverConfig.DENO_ROLE;
+const lifecycle = new ApplicationLifecycle();
+let held = false;
+let signalsRegistered = false;
+const requestShutdown = () => {
+  lifecycle.shutdown().then(() => {
+    if (signalsRegistered) {
+      Deno.removeSignalListener("SIGINT", requestShutdown);
+      if (Deno.build.os !== "windows") {
+        Deno.removeSignalListener("SIGTERM", requestShutdown);
+      }
+      signalsRegistered = false;
+    }
+  }).catch((error) => {
+    console.error("[SHUTDOWN HOLD] Resource drain failed", error);
+    // Uncertain resource closure retains one explicit process reference.
+    if (!held) {
+      held = true;
+      setInterval(() => {}, 60_000);
+    }
+  });
+};
+if (import.meta.main && !Deno.args.includes("build")) {
+  Deno.addSignalListener("SIGINT", requestShutdown);
+  if (Deno.build.os !== "windows") {
+    Deno.addSignalListener("SIGTERM", requestShutdown);
+  }
+  signalsRegistered = true;
+}
 // Lazy import DB and background services only when not running in pure web mode
 let dbManager:
   | typeof import("$server/database/databaseManager.ts").dbManager
@@ -45,16 +81,21 @@ let BackgroundFeeService:
   | typeof import("$server/services/fee/backgroundFeeService.ts").BackgroundFeeService
   | undefined;
 if (DENO_ROLE !== "web") {
-  const dbModule = await import("$server/database/databaseManager.ts");
-  dbManager = dbModule.dbManager;
-  await import("$server/database/index.ts");
-  const feeModule = await import(
-    "$server/services/fee/backgroundFeeService.ts"
-  );
-  BackgroundFeeService = feeModule.BackgroundFeeService;
+  await applicationWork.run(async () => {
+    const dbModule = await import("$server/database/databaseManager.ts");
+    dbManager = dbModule.dbManager;
+    lifecycle.ownProducer(() => dbManager!.stopProducers());
+    lifecycle.ownResource(() => dbManager!.closeAllClients());
+    await import("$server/database/index.ts");
+    const feeModule = await import(
+      "$server/services/fee/backgroundFeeService.ts"
+    );
+    BackgroundFeeService = feeModule.BackgroundFeeService;
+    lifecycle.ownProducer(() => BackgroundFeeService!.stop());
+  });
 }
 
-if (import.meta.main) {
+if (import.meta.main && !lifecycle.stopping) {
   if (!Deno.args.includes("build")) {
     // Resolve the network profile and, off Mainnet, prove Bitcoin Core and
     // Counterparty serve the configured chain before serving anything.
@@ -63,7 +104,7 @@ if (import.meta.main) {
         "$server/config/networkProfile.ts"
       );
       const profile = getNetworkProfile();
-      await verifyNetworkIdentity(profile);
+      await applicationWork.run(() => verifyNetworkIdentity(profile));
       console.log(`[MAIN] Network profile: ${profile.name}`);
     } catch (e) {
       console.error(
@@ -71,17 +112,24 @@ if (import.meta.main) {
           e instanceof Error ? e.message : String(e)
         }`,
       );
-      Deno.exit(1);
+      if (!lifecycle.stopping) Deno.exit(1);
     }
   }
   if (!Deno.args.includes("build") && DENO_ROLE !== "web") {
     try {
       console.log(`[MAIN] Attempting dbManager.initialize() at ${Date.now()}`);
-      await dbManager!.initialize();
+      await applicationWork.run(() => dbManager!.initialize());
       console.log(`[MAIN] dbManager.initialize() completed at ${Date.now()}`);
+      if (nativeReaderRequested() && !lifecycle.stopping) {
+        const proof = await applicationWork.run(() =>
+          verifyNativeReaderProfile(nativeReaderSettings()!)
+        );
+        const stop = watchNativeReaderLease(proof, requestShutdown);
+        lifecycle.ownProducer(stop);
+      }
 
       // Start background fee cache warming service
-      BackgroundFeeService!.start();
+      if (!lifecycle.stopping) BackgroundFeeService!.start();
       console.log(
         `[MAIN] Background fee service started`,
       );
@@ -97,6 +145,7 @@ if (import.meta.main) {
           e,
         );
       }
+      if (nativeReaderRequested() && !lifecycle.stopping) throw e;
     }
   }
 
@@ -110,7 +159,22 @@ if (import.meta.main) {
     if (!serverConfig.IS_DEVELOPMENT) {}
     // HOSTNAME restricts the listener (e.g. 127.0.0.1); unset keeps Fresh's default.
     const hostname = Deno.env.get("HOSTNAME");
-    await start(manifest, hostname ? { ...config, hostname } : config);
+    const handler = lifecycle.stopping
+      ? undefined
+      : await applicationWork.run(() => createHandler(manifest, config));
+    if (!lifecycle.stopping && handler) {
+      const server = Deno.serve({
+        ...(config.server ?? config),
+        ...(hostname ? { hostname } : {}),
+      }, (request, info) => {
+        if (!applicationWork.accepting) {
+          return new Response("Application is draining", { status: 503 });
+        }
+        return applicationWork.run(() => handler(request, info));
+      });
+      lifecycle.ownServer(server);
+      await server.finished;
+    }
     console.log(`[MAIN] Server started at ${Date.now()}`);
   }
 }

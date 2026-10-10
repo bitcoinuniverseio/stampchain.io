@@ -20,6 +20,16 @@ export class NativeReaderWork {
   #active = 0;
   #stopped = false;
 
+  constructor(
+    readonly beforeOperation?: () => Promise<void>,
+    readonly observeActual?: (actual: Promise<unknown>) => void,
+  ) {}
+
+  remainingBudgetMs(): number {
+    this.assertAdmitted();
+    return this.#context.getStore()!.deadline - Date.now();
+  }
+
   get active(): number {
     return this.#active;
   }
@@ -61,7 +71,13 @@ export class NativeReaderWork {
       if (parent.closed) {
         throw new Error("Native reader work context is closed");
       }
-      const actual = Promise.resolve().then(operation);
+      const actual = Promise.resolve().then(async () => {
+        if (this.beforeOperation) {
+          await this.beforeOperation();
+          this.assertAdmitted();
+        }
+        return await operation();
+      });
       parent.children.add(actual);
       actual.catch((error) => parent.childFailures.push(error));
       actual.finally(() => parent.children.delete(actual)).catch(() => {});
@@ -99,6 +115,10 @@ export class NativeReaderWork {
           let failure: unknown;
           let failed = false;
           try {
+            if (this.beforeOperation) {
+              await this.beforeOperation();
+              this.assertAdmitted();
+            }
             result = await operation();
           } catch (error) {
             failed = true;
@@ -121,6 +141,7 @@ export class NativeReaderWork {
           return result as T;
         });
         this.#actual.add(actual);
+        this.observeActual?.(actual);
         actual.then(
           (value) =>
             Date.now() >= deadline

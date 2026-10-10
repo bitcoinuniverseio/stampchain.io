@@ -136,6 +136,8 @@ Deno.test("actualDatabaseManager pooled probe retains client until driver settle
     };
     class Manager extends DatabaseManager {
       protected override async verifyNativeProfile() {}
+        // These tests isolate driver settlement; lease authority has its own controls.
+        protected override async admitNativeOperation() {}
       protected override makeNativeClient(): Client {
         factories++;
         return fake as unknown as Client;
@@ -211,6 +213,8 @@ Deno.test("actualDatabaseManager fresh acquisition is tracked before late probe 
     };
     class Manager extends DatabaseManager {
       protected override async verifyNativeProfile() {}
+        // These tests isolate driver settlement; lease authority has its own controls.
+        protected override async admitNativeOperation() {}
       protected override makeNativeClient(): Client {
         factories++;
         return fake as unknown as Client;
@@ -500,6 +504,8 @@ for (const pooled of [true, false]) {
       };
       class Manager extends DatabaseManager {
         protected override async verifyNativeProfile() {}
+        // These tests isolate driver settlement; lease authority has its own controls.
+        protected override async admitNativeOperation() {}
         protected override makeNativeClient(): Client {
           factories++;
           return fake as unknown as Client;
@@ -561,6 +567,8 @@ Deno.test("actualDatabaseManager tracked unreleased leases block a third factory
     const clients: Client[] = [];
     class Manager extends DatabaseManager {
       protected override async verifyNativeProfile() {}
+        // These tests isolate driver settlement; lease authority has its own controls.
+        protected override async admitNativeOperation() {}
       protected override makeNativeClient(): Client {
         const fake = {
           async connect() {},
