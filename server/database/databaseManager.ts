@@ -13,6 +13,8 @@ import {
     setup,
 } from "@std/log";
 import { Client } from "mysql/mod.ts";
+import { nativeReaderSettings, verifyNativeReaderProfile, requireNativeProbeReply, prepareNativeReaderConnection } from "./nativeReaderProfile.ts";
+import { NativeReaderWork } from "./nativeReaderWork.ts";
 // Conditionally import Redis based on build mode
 // BROWSER GUARD: Only access Deno when available (server-side)
 let connect: any;
@@ -87,6 +89,8 @@ function shouldInitializeRedis(): boolean {
 }
 
 class DatabaseManager {
+  readonly #nativeSettings = nativeReaderSettings();
+  readonly #nativeWork = new NativeReaderWork();
   #pool: Client[] = [];
   #activeConnections = 0; // Track active connections
   #redisClient: any | undefined; // Redis client type
@@ -137,7 +141,7 @@ class DatabaseManager {
     this.#CONNECTION_TIMEOUT = this.#dbPoolConfig.connectionTimeout;
     this.#VALIDATION_TIMEOUT = this.#dbPoolConfig.validationTimeout;
     this.#IDLE_TIMEOUT = 0; // Disable idle timeout
-    this.#MAX_RECONNECTS = 3;
+    this.#MAX_RECONNECTS = this.#nativeSettings ? 1 : 3;
     this.#RECONNECT_DELAY = this.#dbPoolConfig.retryDelay;
     this.#ENABLE_COMPRESSION = this.#dbPoolConfig.enableCompression;
     this.#ENABLE_CONNECTION_LOGGING = this.#dbPoolConfig.enableConnectionLogging;
@@ -147,6 +151,13 @@ class DatabaseManager {
   }
 
   public async initialize(): Promise<void> {
+    if (this.#nativeSettings) {
+      await this.#nativeWork.run(async () => {
+        const client = await this.getClient();
+        this.releaseClient(client);
+      }, 4000);
+      return;
+    }
     // Warm up connection pool to MIN_CONNECTIONS
     await this.warmupConnectionPool();
 
@@ -197,6 +208,7 @@ class DatabaseManager {
   }
 
   async getClient(): Promise<Client> {
+    if (this.#nativeSettings) return await this.#getNativeClient();
     if (this.#pool.length > 0) {
       const client = this.#pool.pop() as Client;
       // Increment immediately on pop so closeClient()'s decrement correctly
@@ -242,6 +254,48 @@ class DatabaseManager {
     throw new Error(errorMsg);
   }
 
+  protected async verifyNativeProfile(): Promise<void> {
+    await verifyNativeReaderProfile(this.#nativeSettings!);
+  }
+
+  protected makeNativeClient(): Client {
+    return new Client();
+  }
+
+  async #getNativeClient(): Promise<Client> {
+    this.#nativeWork.assertAdmitted();
+    if (this.#activeConnections >= 2 || this.#activeConnections + this.#pool.length > 2) {
+      throw new Error("Native reader tracked lease limit reached");
+    }
+    if (!this.#pool.length) {
+      const client = await this.createConnection();
+      this.#activeConnections++;
+      return client;
+    }
+    const client = this.#pool.pop()!;
+    this.#activeConnections++;
+    let callerFailed = false;
+    const deadline = Date.now() + 4000;
+    try {
+      await this.#nativeWork.run(async () => {
+        try {
+          requireNativeProbeReply(await client.query("SELECT 1 AS native_reader_probe"));
+          this.#nativeWork.assertAdmitted();
+          if (Date.now() >= deadline) throw new Error("Native validation deadline exceeded");
+          if (callerFailed) throw new Error("Native validation completed after caller deadline");
+        } catch (error) {
+          // This branch runs only after the actual query settled.
+          await this.closeClient(client);
+          throw error;
+        }
+      }, 4000);
+      return client;
+    } catch (error) {
+      callerFailed = true;
+      throw error;
+    }
+  }
+
   /**
    * Warm up connection pool to minimum connections
    */
@@ -277,6 +331,13 @@ class DatabaseManager {
    * Validate a database connection
    */
   async #validateConnection(client: Client): Promise<void> {
+    if (this.#nativeSettings) {
+      await this.#nativeWork.run(async () => {
+        const rows = await client.query("SELECT 1 AS native_reader_probe");
+        requireNativeProbeReply(rows);
+      }, 4000);
+      return;
+    }
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error(`Connection validation timeout after ${this.#VALIDATION_TIMEOUT}ms`)), this.#VALIDATION_TIMEOUT);
     });
@@ -334,6 +395,9 @@ class DatabaseManager {
    * Use only when connection pool is in an inconsistent state
    */
   async resetConnectionPool(): Promise<void> {
+    if (this.#nativeSettings && this.#nativeWork.active) {
+      throw new Error("Native reader cannot reset an unsettled driver pool");
+    }
     this.#logger.warn("Resetting connection pool due to inconsistent state");
 
     // Log current state before reset
@@ -355,6 +419,10 @@ class DatabaseManager {
   }
 
   async closeAllClients(): Promise<void> {
+    if (this.#nativeSettings) {
+      this.#nativeWork.stopAdmission();
+      await this.#nativeWork.drain();
+    }
     // Stop keep-alive interval
     if (this.#keepAliveInterval) {
       clearInterval(this.#keepAliveInterval);
@@ -383,6 +451,23 @@ class DatabaseManager {
   }
 
   async executeQuery<T>(query: string, params: unknown[]): Promise<T> {
+    if (this.#nativeSettings) {
+      return await this.#nativeWork.run(async () => {
+        await this.verifyNativeProfile();
+        const client = await this.getClient();
+        let reusable = false;
+        try {
+          this.#nativeWork.assertAdmitted();
+          const result = await client.execute(query, params);
+          await this.verifyNativeProfile();
+          reusable = true;
+          return result as T;
+        } finally {
+          if (reusable) this.releaseClient(client);
+          else await this.closeClient(client);
+        }
+      }, 10000);
+    }
     for (let attempt = 1; attempt <= this.#MAX_RETRIES; attempt++) {
       let client: Client | null = null;
       try {
@@ -566,6 +651,32 @@ class DatabaseManager {
   }
 
   async #attemptConnection(): Promise<Client> {
+    if (this.#nativeSettings) {
+      await this.verifyNativeProfile();
+      let callerFailed = false;
+      const deadline = Date.now() + 4000;
+      try {
+        return await this.#nativeWork.run(async () => {
+          const client = this.makeNativeClient();
+          try {
+            await prepareNativeReaderConnection(client, this.#nativeSettings!, this.config.DB_PASSWORD, () => {
+              this.#nativeWork.assertAdmitted();
+              if (callerFailed || Date.now() >= deadline) throw new Error("Native connection deadline exceeded");
+            });
+            this.#nativeWork.assertAdmitted();
+            if (Date.now() >= deadline) throw new Error("Native connection deadline exceeded");
+            if (callerFailed) throw new Error("Native connection completed after caller deadline");
+            return client;
+          } catch (error) {
+            await client.close();
+            throw error;
+          }
+        }, 4000);
+      } catch (error) {
+        callerFailed = true;
+        throw error;
+      }
+    }
     const { DB_HOST, DB_USER, DB_PASSWORD, DB_PORT, DB_NAME } = this.config;
     const charset = 'utf8mb4';
 

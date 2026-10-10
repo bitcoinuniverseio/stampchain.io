@@ -1,3 +1,5 @@
+import { nativeReaderRequested } from "../database/nativeReaderProfile.ts";
+
 /**
  * Database Configuration Module
  * Provides environment-aware settings for database connection pooling
@@ -39,6 +41,24 @@ export interface DatabaseConfig {
 export function getDatabaseConfig(): DatabaseConfig {
   const env = Deno.env.get('DENO_ENV') || 'production';
   const isProduction = env === 'production';
+
+  if (nativeReaderRequested()) {
+    return {
+      maxConnections: 2,
+      minConnections: 0,
+      maxWaitingForConnection: 2,
+      connectionTimeout: 4000,
+      acquireTimeout: 4000,
+      validationTimeout: 4000,
+      enableCompression: false,
+      enableConnectionLogging: false,
+      maxRetries: 1,
+      retryDelay: 0,
+      healthCheckInterval: 30000,
+      environment: isProduction ? 'production' : env === 'test' ? 'test' : 'development',
+      isRemoteDatabase: false,
+    };
+  }
 
   // Check if we're connecting to a remote database (dev scenario)
   const dbHost = Deno.env.get('DB_HOST') || 'localhost';

@@ -1,5 +1,5 @@
 {
-  "lock": false,
+  "lock": { "path": "./deno.lock", "frozen": true },
   "lockfile": "deno.lock",
   "tasks": {
     "start": "deno task check_version && deno cache --node-modules-dir main.ts server/middleware/openapiValidator.ts && deno run -A main.ts",
@@ -179,7 +179,7 @@
     "fresh_charts/": "https://deno.land/x/fresh_charts@0.3.1/",
     "fresh/tests/": "https://deno.land/x/fresh@1.7.6/tests/",
     "msgpack": "https://deno.land/x/msgpack@v1.4/mod.ts",
-    "mysql/": "https://deno.land/x/mysql@v2.12.1/",
+    "mysql/": "./vendor/mysql-2.12.1/",
     "preact": "https://esm.sh/preact@10.27.2",
     "preact/": "https://esm.sh/preact@10.27.2/",
     "puppeteer": "npm:puppeteer-core@23.11.1",
