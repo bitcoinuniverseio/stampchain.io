@@ -1,0 +1,161 @@
+{
+  "source": "https://deno.land/x/mysql@v2.12.1/",
+  "version": "2.12.1",
+  "originalFrozenLock": "56a96600f1b77c8d4a58dccc864af1242dc36703:deno.lock",
+  "modifiedFiles": [
+    "src/auth.ts",
+    "src/auth_plugin/caching_sha2_password.ts",
+    "src/auth_plugin/crypt.ts",
+    "src/buffer.ts",
+    "src/client.ts",
+    "src/connection.ts",
+    "src/packets/builders/auth.ts",
+    "src/packets/builders/client_capabilities.ts",
+    "src/packets/builders/tls.ts",
+    "src/packets/packet.ts",
+    "src/packets/parsers/result.ts",
+    "src/pool.ts"
+  ],
+  "files": [
+    {
+      "path": "deps.ts",
+      "upstreamSha256": "68635959a41bb08bc87db007679fb8449febc55d48202dff20b93cc23ef5820d",
+      "vendoredSha256": "68635959a41bb08bc87db007679fb8449febc55d48202dff20b93cc23ef5820d"
+    },
+    {
+      "path": "mod.ts",
+      "upstreamSha256": "3246c9c259434563be69cc95d5b792f8aac7ef5d10b8a6c6589aa54ebf1bd266",
+      "vendoredSha256": "3246c9c259434563be69cc95d5b792f8aac7ef5d10b8a6c6589aa54ebf1bd266"
+    },
+    {
+      "path": "src/auth.ts",
+      "upstreamSha256": "129ea08b180d3e90e567c3f71e60432bb266304c224e17ea39d604bbcc1160d8",
+      "vendoredSha256": "d5d9f75f7049e374284786683b5f522b620dcb306337ccaee1f6b556715e1262"
+    },
+    {
+      "path": "src/auth_plugin/caching_sha2_password.ts",
+      "upstreamSha256": "aab89e272382e6f408406f860ae6e79628275f4511e27a565049033543c4bdec",
+      "vendoredSha256": "89f09ed723de4fa2d1fca3132a93590594f08a02c43ab083a4947d15d8b9e0e2"
+    },
+    {
+      "path": "src/auth_plugin/crypt.ts",
+      "upstreamSha256": "8798819cce1171d95cfee8edda15fe6a652068cad4dc91f81b6e91cf90a13617",
+      "vendoredSha256": "f430da77bfa9149ffede2c8890ff9fc053de3ecf4f90a96bd5c39acf951009cc"
+    },
+    {
+      "path": "src/auth_plugin/index.ts",
+      "upstreamSha256": "8617e520ad854e38470aeefd07becdb3397c4cde16c2397dd48d5c10fdd5ab09",
+      "vendoredSha256": "8617e520ad854e38470aeefd07becdb3397c4cde16c2397dd48d5c10fdd5ab09"
+    },
+    {
+      "path": "src/buffer.ts",
+      "upstreamSha256": "59f7e08e196f1b7e58cf5c3cf8ae8f4d0d47d1ae31430076fc468d974d3b59e7",
+      "vendoredSha256": "f53e0cbc035c9a06e5457ab38116a414cd25200856d4e72c20c543317c050693"
+    },
+    {
+      "path": "src/client.ts",
+      "upstreamSha256": "30912964986667a2ce108c14f7153dd38e8089e55f8068e8d07697f75f2ac22f",
+      "vendoredSha256": "267b5076ebd9287d1956fd3758db558abc2555a7be8d0f8c4c083db1d66017c7"
+    },
+    {
+      "path": "src/connection.ts",
+      "upstreamSha256": "1d104c05441f8c94ee73123497fbbae28499f3badb0d9fef8cc82540688ada6e",
+      "vendoredSha256": "9dd993ad965ff2dec248c8e636f87da54d9029b37154522655944877ef01bb38"
+    },
+    {
+      "path": "src/constant/capabilities.ts",
+      "upstreamSha256": "2324c0e46ac43f59b7b03bdd878d7a14ecc5202b9e133c7e8769345a8290f2a1",
+      "vendoredSha256": "2324c0e46ac43f59b7b03bdd878d7a14ecc5202b9e133c7e8769345a8290f2a1"
+    },
+    {
+      "path": "src/constant/charset.ts",
+      "upstreamSha256": "253d7233679c774df623d1f974ebb358f3678c18fd6a623e25983311d97d959b",
+      "vendoredSha256": "253d7233679c774df623d1f974ebb358f3678c18fd6a623e25983311d97d959b"
+    },
+    {
+      "path": "src/constant/errors.ts",
+      "upstreamSha256": "923bab27d524e43199fa21fdfcbe025580ca76d8b32254ad9505765c502f238a",
+      "vendoredSha256": "923bab27d524e43199fa21fdfcbe025580ca76d8b32254ad9505765c502f238a"
+    },
+    {
+      "path": "src/constant/mysql_types.ts",
+      "upstreamSha256": "79c50de8eb5919b897e81e2ff2366ee1ffdbb4297f711e15003bdb787bbc8e6c",
+      "vendoredSha256": "79c50de8eb5919b897e81e2ff2366ee1ffdbb4297f711e15003bdb787bbc8e6c"
+    },
+    {
+      "path": "src/constant/packet.ts",
+      "upstreamSha256": "a1e7e00ce30c551c5f95c05d233b8d83f8e1fc865de97be3b317058e173630a9",
+      "vendoredSha256": "a1e7e00ce30c551c5f95c05d233b8d83f8e1fc865de97be3b317058e173630a9"
+    },
+    {
+      "path": "src/deferred.ts",
+      "upstreamSha256": "35d087619d919961e849e382c33b2bfea15b4119f55eca2d9c9047f30512a2cb",
+      "vendoredSha256": "35d087619d919961e849e382c33b2bfea15b4119f55eca2d9c9047f30512a2cb"
+    },
+    {
+      "path": "src/logger.ts",
+      "upstreamSha256": "eb5feb3efdb9fd4887f6eccd5c06b5702591ac032af9857a12bbae86ceefe21b",
+      "vendoredSha256": "eb5feb3efdb9fd4887f6eccd5c06b5702591ac032af9857a12bbae86ceefe21b"
+    },
+    {
+      "path": "src/packets/builders/auth.ts",
+      "upstreamSha256": "0b53dd5fa0269427aa54c3f6909bd830ffb426009061df89df262c504d6c9b70",
+      "vendoredSha256": "53a4234be5768fb4a6cf7f49c9d9465c4c12a54a2eb22787c8e94b42f696ae02"
+    },
+    {
+      "path": "src/packets/builders/client_capabilities.ts",
+      "upstreamSha256": "1000f2c1a20e0e119b9a416eb4ea4553cc1c5655d289a66e9077bf7a5993d52d",
+      "vendoredSha256": "145ae874647b4b528764252baee68e828fd279cef0eaa14a04a27167b16d4de1"
+    },
+    {
+      "path": "src/packets/builders/query.ts",
+      "upstreamSha256": "caf426a72ebe545ff5bab14c8b7b5e412dd8827c091322959cdf4e9aa89ef900",
+      "vendoredSha256": "caf426a72ebe545ff5bab14c8b7b5e412dd8827c091322959cdf4e9aa89ef900"
+    },
+    {
+      "path": "src/packets/builders/tls.ts",
+      "upstreamSha256": "2abb4a2fa74c47914372b221cb6f178f6015df54421daf0e10e54d80d7156498",
+      "vendoredSha256": "05214f8bd3f70e699c98c96c9a3d14e2dfc480d21ba15a6347f1a306407a1b96"
+    },
+    {
+      "path": "src/packets/packet.ts",
+      "upstreamSha256": "d7800cc142226f7dfd3c5f647f03cd3ef308f9d8551b4edb2e1bfb9c758d33b6",
+      "vendoredSha256": "5c8269dad6b379880b6ee493208cdb816e5bade2ab9b87c96bf15d8e2a968092"
+    },
+    {
+      "path": "src/packets/parsers/authswitch.ts",
+      "upstreamSha256": "aa34f21336c4907b3ae968108fcdad8f1c43a303088efd83d972e6c7b258c166",
+      "vendoredSha256": "aa34f21336c4907b3ae968108fcdad8f1c43a303088efd83d972e6c7b258c166"
+    },
+    {
+      "path": "src/packets/parsers/err.ts",
+      "upstreamSha256": "4110c4ddc2ae8358d6661fa2522f8eda2e603900d1e433e3684765ed50e88ed8",
+      "vendoredSha256": "4110c4ddc2ae8358d6661fa2522f8eda2e603900d1e433e3684765ed50e88ed8"
+    },
+    {
+      "path": "src/packets/parsers/handshake.ts",
+      "upstreamSha256": "88f7ee34e9e0ef089bc5fdefacaccf256ef002b2f7a8ad684e35327682039e73",
+      "vendoredSha256": "88f7ee34e9e0ef089bc5fdefacaccf256ef002b2f7a8ad684e35327682039e73"
+    },
+    {
+      "path": "src/packets/parsers/result.ts",
+      "upstreamSha256": "8ab16f1adae67415eefcc17803b0eb828c1f4c6a24c55f25949f418e862d3ec8",
+      "vendoredSha256": "86a5d893d2d86d8606815907b1be91a3d2d0ebc76926f3788948d69ee597058a"
+    },
+    {
+      "path": "src/pool.ts",
+      "upstreamSha256": "978ba2813b3886d68be007678360ad43c54dab14b1aea1c07fcdb41222fcc432",
+      "vendoredSha256": "1a40e8d5f009451f9715f97eb8308d547d1a5540650b379694a5bdb0b1e3feb0"
+    },
+    {
+      "path": "src/util.ts",
+      "upstreamSha256": "83d38e87cc3901da00ac44bfcd53c0e8d24525262f5c7647c912dccf3ed2dbb5",
+      "vendoredSha256": "83d38e87cc3901da00ac44bfcd53c0e8d24525262f5c7647c912dccf3ed2dbb5"
+    }
+  ],
+  "changes": "Secure cold caching_sha2 transport and per-handshake state plus behavior-preserving Deno2.6.9/strict-TypeScript compatibility. No crypto algorithm/versions/validation changes; insecureTCP cold remains unsupported.",
+  "license": {
+    "source": "https://raw.githubusercontent.com/denodrivers/mysql/v2.12.1/LICENSE",
+    "sha256": "cc42cc88f0d8c820f3e109aaca6dcc87b7c9348fe565bf9a565a1407c486aaee"
+  }
+}
