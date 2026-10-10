@@ -151,7 +151,9 @@ export function validateWalletAddressForMinting(address: string): {
   const p2pkhRegex = testChain
     ? /^[mn][1-9A-HJ-NP-Za-km-z]{25,34}$/
     : /^1[1-9A-HJ-NP-Za-km-z]{25,34}$/;
-  const bech32Regex = testChain ? /^tb1q[0-9a-z]{38,59}$/ : /^bc1q[0-9a-z]{38,59}$/;
+  const bech32Regex = testChain
+    ? /^tb1q[0-9a-z]{38,59}$/
+    : /^bc1q[0-9a-z]{38,59}$/;
 
   if (p2pkhRegex.test(address) || bech32Regex.test(address)) {
     return { isValid: true };
