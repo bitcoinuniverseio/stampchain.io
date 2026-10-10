@@ -135,6 +135,7 @@
   ],
   "nodeModulesDir": "auto",
   "imports": {
+    "https://esm.sh/@noble/hashes@1.8.0/esm/legacy.ts.d.ts": "npm:@noble/hashes@1.8.0/legacy",
     "web-vitals": "https://esm.sh/web-vitals@4.2.4",
     "stream": "node:stream",
     "stream/promises": "node:stream/promises",
