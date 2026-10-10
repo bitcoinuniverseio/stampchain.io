@@ -61,6 +61,9 @@ export class BTCPriceService {
    * Get BTC price with Redis caching and comprehensive fallback
    */
   static async getPrice(preferredSource?: string): Promise<BTCPriceData> {
+    if (nativeReaderRequested()) {
+      throw new Error("Owned SQL reader has no qualified price authority");
+    }
     const startTime = Date.now();
 
     try {
@@ -633,3 +636,4 @@ export class BTCPriceService {
   }
 
 }
+import { nativeReaderRequested } from "$server/database/nativeReaderProfile.ts";

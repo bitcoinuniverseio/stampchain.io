@@ -57,6 +57,7 @@ export async function prepareNativeReaderConnection(
 }
 
 export interface NativeReaderProof {
+  lease?: import("./nativeReaderLease.ts").NativeReaderLease;
   schemaVersion: "universe-stamps-mysql-reader-proof-v1";
   network: "mainnet";
   genesisHash: string;

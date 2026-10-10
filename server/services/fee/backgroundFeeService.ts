@@ -1,6 +1,8 @@
 import { logger } from "$lib/utils/logger.ts";
 import { getProductionFeeService } from "$server/services/fee/feeServiceFactory.ts";
 import { BTCPriceService } from "$server/services/price/btcPriceService.ts";
+import { applicationWork } from "$server/lifecycle/workDrain.ts";
+import { nativeReaderRequested } from "$server/database/nativeReaderProfile.ts";
 
 export class BackgroundFeeService {
   private static intervalId: number | null = null;
@@ -19,6 +21,8 @@ export class BackgroundFeeService {
    * Start the background fee and BTC price warming service
    */
   static start(): void {
+    // This profile has SQL read authority, not authority for external prices.
+    if (nativeReaderRequested()) return;
     if (this.isRunning) {
       logger.warn("stamps", {
         message: "Background fee service is already running",
@@ -34,16 +38,23 @@ export class BackgroundFeeService {
     });
 
     // Start fee warming immediately and then on interval
-    this.warmFeeCache();
+    this.scheduleWarm(() => this.warmFeeCache());
     this.intervalId = setInterval(() => {
-      this.warmFeeCache();
+      this.scheduleWarm(() => this.warmFeeCache());
     }, this.INTERVAL_MS);
 
     // Start BTC price warming immediately and then on interval
-    this.warmPriceCache();
+    this.scheduleWarm(() => this.warmPriceCache());
     this.priceIntervalId = setInterval(() => {
-      this.warmPriceCache();
+      this.scheduleWarm(() => this.warmPriceCache());
     }, this.PRICE_INTERVAL_MS);
+  }
+
+  private static scheduleWarm(operation: () => Promise<void>): void {
+    if (!applicationWork.accepting) return;
+    applicationWork.run(operation).catch((error) => {
+      logger.error("stamps", { message: "Cache warming failed", error });
+    });
   }
 
   /**
