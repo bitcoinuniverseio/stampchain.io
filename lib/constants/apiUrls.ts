@@ -26,7 +26,9 @@ const _stampchainNetwork = typeof Deno !== "undefined"
 // Off Mainnet the esplora fallback is the deployment's own esplora (MEMPOOL_API_URL),
 // never the public Mainnet blockstream.info.
 export const BLOCKSTREAM_API_BASE_URL = _blockstreamUrl ||
-  (_stampchainNetwork === "mainnet" ? "https://blockstream.info/api" : _mempoolUrl || "");
+  (_stampchainNetwork === "mainnet"
+    ? "https://blockstream.info/api"
+    : _mempoolUrl || "");
 
 /** CoinGecko API for cryptocurrency price data */
 export const COINGECKO_API_BASE_URL = "https://api.coingecko.com/api/v3";

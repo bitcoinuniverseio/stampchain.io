@@ -103,19 +103,23 @@ const _stampchainNetwork = typeof Deno !== "undefined"
 export const XCP_V2_NODES: ReadonlyArray<{ name: string; url: string }> =
   _xcpApiUrl
     ? [{
-      name: _stampchainNetwork === "mainnet" ? "mock" : "counterparty-self-hosted",
+      name: _stampchainNetwork === "mainnet"
+        ? "mock"
+        : "counterparty-self-hosted",
       url: _xcpApiUrl,
     }]
-    : _stampchainNetwork !== "mainnet" ? [] : [
-    {
-      name: "counterparty.io",
-      url: "https://api.counterparty.io:4000/v2",
-    },
-    {
-      name: "dev.counterparty.io",
-      url: "https://api.counterparty.io:4000/v2",
-    },
-  ];
+    : _stampchainNetwork !== "mainnet"
+    ? []
+    : [
+      {
+        name: "counterparty.io",
+        url: "https://api.counterparty.io:4000/v2",
+      },
+      {
+        name: "dev.counterparty.io",
+        url: "https://api.counterparty.io:4000/v2",
+      },
+    ];
 
 /**
  * Circuit breaker fallback data for trending tokens
