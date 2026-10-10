@@ -196,16 +196,23 @@ class NativeReaderLeaseAuthority:
                 if not self.native_fence():
                     self.revoke("native_source_ended_or_changed")
                     break
+                frame_deadline = min(time.monotonic() + 1, self.deadline)
                 try:
                     connection, _ = listener.accept()
                 except TimeoutError:
                     continue
                 with connection:
-                    connection.settimeout(max(0.001, min(1, self.deadline - time.monotonic())))
                     peer = struct.unpack("3i", connection.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, 12))
                     raw = bytearray()
                     try:
                         while not raw.endswith(b"\n"):
+                            remaining = frame_deadline - time.monotonic()
+                            if remaining <= 0 or not self.reader_fence(peer) or not self.native_fence():
+                                raise RuntimeError("admission_frame_deadline_or_source_refused")
+                            remaining = frame_deadline - time.monotonic()
+                            if remaining <= 0:
+                                raise RuntimeError("admission_frame_deadline")
+                            connection.settimeout(remaining)
                             part = connection.recv(min(1024, 4097 - len(raw)))
                             if not part:
                                 raise RuntimeError("truncated_admission_frame")
@@ -213,6 +220,13 @@ class NativeReaderLeaseAuthority:
                             if len(raw) > 4096:
                                 raise RuntimeError("oversized_admission_frame")
                         reply = self.admit(json.loads(raw), peer)
+                        remaining = frame_deadline - time.monotonic()
+                        if remaining <= 0 or not self.reader_fence(peer) or not self.native_fence():
+                            raise RuntimeError("admission_reply_deadline_or_source")
+                        remaining = frame_deadline - time.monotonic()
+                        if remaining <= 0:
+                            raise RuntimeError("admission_reply_deadline")
+                        connection.settimeout(remaining)
                         connection.sendall(json.dumps(reply).encode() + b"\n")
                     except (ValueError, RuntimeError, OSError):
                         # Refusal never becomes an admitted reply or SQL success.

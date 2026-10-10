@@ -104,3 +104,38 @@ Deno.test("uncertain producer stop retains stores instead of reporting clean clo
   await rejects(() => lifecycle.shutdown(), /Background admission/);
   equal(closed, false);
 });
+
+Deno.test("reentrant producer stop shares one shutdown and one resource close", async () => {
+  const lifecycle = new ApplicationLifecycle(new WorkDrain());
+  let nested: Promise<void> | undefined;
+  let closed = 0;
+  lifecycle.ownProducer(() => {
+    nested = lifecycle.shutdown();
+  });
+  lifecycle.ownResource(() => {
+    closed++;
+    return Promise.resolve();
+  });
+  const actual = lifecycle.shutdown();
+  equal(actual, nested);
+  await actual;
+  equal(closed, 1);
+});
+
+Deno.test("synchronous HTTP shutdown uncertainty rejects shared drain and retains stores", async () => {
+  const lifecycle = new ApplicationLifecycle(new WorkDrain());
+  let closed = false;
+  lifecycle.ownServer({
+    shutdown: () => {
+      throw new Error("synthetic listener uncertainty");
+    },
+  } as unknown as Deno.HttpServer);
+  lifecycle.ownResource(() => {
+    closed = true;
+    return Promise.resolve();
+  });
+  const actual = lifecycle.shutdown();
+  equal(actual, lifecycle.shutdown());
+  await rejects(() => actual, /Background admission/);
+  equal(closed, false);
+});
