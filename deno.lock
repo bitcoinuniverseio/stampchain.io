@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@luca/esbuild-deno-loader@0.11.0": "0.11.0",
     "jsr:@std/assert@0.224": "0.224.0",
+    "jsr:@std/assert@^1.0.9": "1.0.19",
     "jsr:@std/assert@~0.219.1": "0.219.1",
     "jsr:@std/async@1": "1.1.1",
     "jsr:@std/bytes@1": "1.0.6",
@@ -53,6 +54,12 @@
     },
     "@std/assert@0.224.0": {
       "integrity": "8643233ec7aec38a940a8264a6e3eed9bfa44e7a71cc6b3c8874213ff401967f"
+    },
+    "@std/assert@1.0.19": {
+      "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
     },
     "@std/async@1.1.1": {
       "integrity": "8a79beb3378cc229ce65ba2c746cfd03e4855ddd891d1eb6b9e32128e0d5339c"

@@ -233,6 +233,15 @@ jobs:
           echo "=== Dev Server Logs ==="
           cat dev-server.log || echo "No dev server logs available"
 
+      - name: Diagnose browser navigation on failure
+        if: failure()
+        run: |
+          curl --noproxy '*' --max-time 5 --silent --head http://localhost:8000/ | sed -n '/^HTTP\//p; /^Location:/Ip'
+          timeout 20 "$CHROME_PATH" --headless --no-sandbox --disable-dev-shm-usage \
+            --log-net-log=chrome-navigation-netlog.json --dump-dom http://localhost:8000/ \
+            > chrome-navigation.html 2> chrome-navigation.log || true
+          node -e 'const fs = require("fs"); const p = "chrome-navigation-netlog.json"; if (fs.existsSync(p)) { const v = JSON.parse(fs.readFileSync(p, "utf8")); console.log(JSON.stringify(v.events.filter(e => e.params && e.params.net_error).map(e => ({type: e.type, netError: e.params.net_error})).slice(-20))); } const html = fs.readFileSync("chrome-navigation.html", "utf8"); console.log(html.match(/<title>[^<]*<\/title>/)?.[0] || "No document title");'
+
       - name: Cleanup
         if: always()
         run: |
