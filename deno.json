@@ -338,7 +338,14 @@
     "$/lib/utils/sorting/localStorage.ts": "./lib/utils/data/sorting/localStorage.ts",
     "$/lib/utils/sorting/performance.ts": "./lib/utils/data/sorting/performance.ts",
     "$/lib/utils/sorting/sortStateReducer.ts": "./lib/utils/data/sorting/sortStateReducer.ts",
-    "$/lib/utils/src20/errorHandling.tsx": "./lib/utils/bitcoin/src20/errorHandling.tsx"
+    "$/lib/utils/src20/errorHandling.tsx": "./lib/utils/bitcoin/src20/errorHandling.tsx",
+    "https://deno.land/x/imagescript@1.3.0/utils/wasm/font.js": "./vendor/imagescript-1.3.0/wasm/font.js",
+    "https://deno.land/x/imagescript@1.3.0/utils/wasm/gif.js": "./vendor/imagescript-1.3.0/wasm/gif.js",
+    "https://deno.land/x/imagescript@1.3.0/utils/wasm/jpeg.js": "./vendor/imagescript-1.3.0/wasm/jpeg.js",
+    "https://deno.land/x/imagescript@1.3.0/utils/wasm/png.js": "./vendor/imagescript-1.3.0/wasm/png.js",
+    "https://deno.land/x/imagescript@1.3.0/utils/wasm/svg.js": "./vendor/imagescript-1.3.0/wasm/svg.js",
+    "https://deno.land/x/imagescript@1.3.0/utils/wasm/tiff.js": "./vendor/imagescript-1.3.0/wasm/tiff.js",
+    "https://deno.land/x/imagescript@1.3.0/utils/wasm/zlib.js": "./vendor/imagescript-1.3.0/wasm/zlib.js"
   },
   "compilerOptions": {
     "jsx": "react-jsx",
