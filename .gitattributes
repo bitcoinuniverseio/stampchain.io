@@ -3,3 +3,4 @@
 *.tsx text eol=lf
 lighthouserc.cjs text eol=lf
 newman-reporter-enhanced.js text eol=lf
+vendor/imagescript-1.3.0/** -text
