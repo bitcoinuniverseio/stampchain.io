@@ -1,0 +1,5 @@
+# Keep Deno source formatting consistent across Windows and Linux checkouts.
+*.ts text eol=lf
+*.tsx text eol=lf
+lighthouserc.cjs text eol=lf
+newman-reporter-enhanced.js text eol=lf
