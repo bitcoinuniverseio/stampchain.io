@@ -36,6 +36,12 @@ export class ApplicationLifecycle {
 
   shutdown(): Promise<void> {
     if (this.#shutdown) return this.#shutdown;
+    let resolve!: () => void;
+    let reject!: (error: unknown) => void;
+    this.#shutdown = new Promise<void>((yes, no) => {
+      resolve = yes;
+      reject = no;
+    });
     this.#stopping = true;
     this.work.stopAdmission();
     const stopFailures: unknown[] = [];
@@ -46,9 +52,14 @@ export class ApplicationLifecycle {
         stopFailures.push(error);
       }
     }
-    const httpDrain = this.#server?.shutdown();
+    let httpDrain: Promise<void> | undefined;
+    try {
+      httpDrain = this.#server?.shutdown();
+    } catch (error) {
+      stopFailures.push(error);
+    }
     httpDrain?.catch(() => {});
-    this.#shutdown = (async () => {
+    const actual = (async () => {
       // Includes delayed startup and children of requests that disconnected.
       await this.work.drain();
       await httpDrain;
@@ -61,6 +72,7 @@ export class ApplicationLifecycle {
       }
       for (const close of this.#resources) await close();
     })();
+    actual.then(resolve, reject);
     return this.#shutdown;
   }
 }

@@ -1,5 +1,6 @@
 import { throws as assertThrows } from "node:assert";
 import {
+  boundedMetadataConnection,
   requireNativeReaderLease,
   validateLeaseReply,
 } from "../../server/database/nativeReaderLease.ts";
@@ -92,4 +93,79 @@ Deno.test("current source reply refuses replay and changed producer identity", (
   assertThrows(() =>
     validateLeaseReply(reply, lease, "synthetic-nonce", value, 10_000)
   );
+});
+
+Deno.test("pending metadata connect expires and late connection cannot admit SQL", async () => {
+  let release!: (value: Deno.Conn) => void;
+  const pending = new Promise<Deno.Conn>((yes) => {
+    release = yes;
+  });
+  let closed = 0;
+  let admitted = 0;
+  const result = boundedMetadataConnection(() => pending, () => {
+    admitted++;
+    return Promise.resolve();
+  }, 10);
+  const { rejects, equal } = await import("node:assert");
+  await rejects(() => result, /metadata deadline/);
+  release({
+    close: () => {
+      closed++;
+    },
+  } as Deno.Conn);
+  await new Promise((yes) => setTimeout(yes, 0));
+  equal(admitted, 0);
+  equal(closed > 0, true);
+});
+Deno.test("metadata body deadline closes only disposable connection", async () => {
+  const { rejects, equal } = await import("node:assert");
+  let closed = false;
+  let release!: () => void;
+  const pending = new Promise<void>((yes) => {
+    release = yes;
+  });
+  await rejects(() =>
+    boundedMetadataConnection(
+      () =>
+        Promise.resolve({
+          close: () => {
+            closed = true;
+          },
+        } as Deno.Conn),
+      async (_connection, assertCurrent) => {
+        await pending;
+        assertCurrent();
+      },
+      10,
+    ), /metadata deadline/);
+  equal(closed, true);
+  release();
+  await new Promise((yes) => setTimeout(yes, 0));
+});
+
+Deno.test("metadata final completion after deadline refuses even before timer runs", async () => {
+  const { rejects, equal } = await import("node:assert");
+  const oldNow = Date.now;
+  let clock = oldNow();
+  let closed = false;
+  Date.now = () => clock;
+  try {
+    await rejects(() =>
+      boundedMetadataConnection(
+        () =>
+          Promise.resolve({
+            close: () => {
+              closed = true;
+            },
+          } as Deno.Conn),
+        () => {
+          clock += 11;
+          return Promise.resolve("late");
+        },
+        10,
+      ), /metadata deadline/);
+    equal(closed, true);
+  } finally {
+    Date.now = oldNow;
+  }
 });

@@ -67,5 +67,83 @@ class LeaseControls(unittest.TestCase):
                 authority.admit({**self.request(authority), **delta}, (60, 70, 80))
 
 
+    def test_slow_drip_cannot_reset_absolute_frame_deadline(self):
+        from unittest.mock import patch
+        import socket
+        import struct
+        authority = SyntheticAuthority()
+        authority.deadline = 10
+        clock = [0.0]
+        class Connection:
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def getsockopt(self, *args): return struct.pack("3i", 60, 70, 80)
+            def settimeout(self, value): self.timeout = value
+            def recv(self, size):
+                clock[0] += .4
+                return b"x"
+            def sendall(self, value): raise AssertionError("drip never admitted")
+        class Listener:
+            def settimeout(self, value): pass
+            def accept(self):
+                if clock[0] >= 1.2: authority.revoked = True; raise TimeoutError()
+                return Connection(), None
+            def close(self): pass
+        with patch("native_reader_lease.time.monotonic", lambda: clock[0]), patch.object(socket, "SO_PEERCRED", 17, create=True):
+            authority.serve(Listener())
+        self.assertLess(clock[0], 2)
+        self.assertGreaterEqual(authority.native_checks, 4)
+
+
+    def test_eof_frame_never_admits_or_replies(self):
+        from unittest.mock import patch
+        import socket
+        import struct
+        authority = SyntheticAuthority()
+        class Connection:
+            def __enter__(self): return self
+            def __exit__(self, *args): authority.revoked = True
+            def getsockopt(self, *args): return struct.pack("3i", 60, 70, 80)
+            def settimeout(self, value): pass
+            def recv(self, size): return b""
+            def sendall(self, value): raise AssertionError("EOF admitted")
+        class Listener:
+            def settimeout(self, value): pass
+            def accept(self): return Connection(), None
+            def close(self): pass
+        with patch.object(socket, "SO_PEERCRED", 17, create=True):
+            authority.serve(Listener())
+        self.assertTrue(authority.revoked)
+
+
+    def test_native_fence_consuming_deadline_never_reads_or_replies(self):
+        from unittest.mock import patch
+        import socket
+        import struct
+        authority = SyntheticAuthority()
+        clock = [0.0]
+        authority.deadline = 10
+        calls = [0]
+        def native():
+            calls[0] += 1
+            if calls[0] > 1: clock[0] += 1.1
+            return True
+        authority.native_fence = native
+        class Connection:
+            def __enter__(self): return self
+            def __exit__(self, *args): authority.revoked = True
+            def getsockopt(self, *args): return struct.pack("3i", 60, 70, 80)
+            def settimeout(self, value): pass
+            def recv(self, size): raise AssertionError("expired fence reached read")
+            def sendall(self, value): raise AssertionError("expired fence admitted")
+        class Listener:
+            def settimeout(self, value): pass
+            def accept(self): return Connection(), None
+            def close(self): pass
+        with patch("native_reader_lease.time.monotonic", lambda: clock[0]), patch.object(socket, "SO_PEERCRED", 17, create=True):
+            authority.serve(Listener())
+        self.assertTrue(authority.revoked)
+
+
 if __name__ == "__main__":
     unittest.main()
