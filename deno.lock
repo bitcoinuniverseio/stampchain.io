@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@luca/esbuild-deno-loader@0.11.0": "0.11.0",
     "jsr:@std/assert@0.224": "0.224.0",
+    "jsr:@std/assert@^1.0.9": "1.0.19",
     "jsr:@std/assert@~0.219.1": "0.219.1",
     "jsr:@std/async@1": "1.1.1",
     "jsr:@std/bytes@1": "1.0.6",
@@ -22,6 +23,7 @@
     "jsr:@std/yaml@~0.219.1": "0.219.1",
     "npm:@aws-sdk/client-s3@^3.600.0": "3.992.0",
     "npm:@lhci/cli@~0.15.1": "0.15.1",
+    "npm:@noble/hashes@1.8.0": "1.8.0",
     "npm:@resvg/resvg-wasm@2.6.0": "2.6.0",
     "npm:@types/node@*": "25.0.9",
     "npm:ajv-formats@3.0.1": "3.0.1_ajv@8.17.1",
@@ -52,6 +54,12 @@
     },
     "@std/assert@0.224.0": {
       "integrity": "8643233ec7aec38a940a8264a6e3eed9bfa44e7a71cc6b3c8874213ff401967f"
+    },
+    "@std/assert@1.0.19": {
+      "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
     },
     "@std/async@1.1.1": {
       "integrity": "8a79beb3378cc229ce65ba2c746cfd03e4855ddd891d1eb6b9e32128e0d5339c"
@@ -1484,7 +1492,8 @@
       "bin": true
     },
     "basic-ftp@5.1.0": {
-      "integrity": "sha512-RkaJzeJKDbaDWTIPiJwubyljaEPwpVWkm9Rt5h9Nd6h7tEXTJ3VB4qxdZBioV7JO5yLUaOKwz7vDOzlncUsegw=="
+      "integrity": "sha512-RkaJzeJKDbaDWTIPiJwubyljaEPwpVWkm9Rt5h9Nd6h7tEXTJ3VB4qxdZBioV7JO5yLUaOKwz7vDOzlncUsegw==",
+      "deprecated": true
     },
     "bech32@2.0.0": {
       "integrity": "sha512-LcknSilhIGatDAsY1ak2I8VtGaHNhgMSYVxFrGLXv+xLHytaKZKcaUJJUE7qmBr7h33o5YQwP55pMI0xmkpJwg=="
@@ -3660,6 +3669,7 @@
     },
     "uuid@8.3.2": {
       "integrity": "sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==",
+      "deprecated": true,
       "bin": true
     },
     "valibot@0.38.0": {
@@ -4536,6 +4546,7 @@
       "jsr:@std/testing@^1.0.6",
       "jsr:@std/yaml@~0.219.1",
       "npm:@aws-sdk/client-s3@^3.600.0",
+      "npm:@noble/hashes@1.8.0",
       "npm:@types/node@*",
       "npm:bitcoinjs-lib@7.0.0-rc.0",
       "npm:puppeteer-core@23.11.1",

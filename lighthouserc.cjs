@@ -17,17 +17,19 @@
  * - test_address = bc1qkqqre5xuqk60xtt93j297zgg7t6x0ul7gwjmv4
  */
 
+const appBaseUrl = process.env.APP_BASE_URL || "http://localhost:8000";
+
 module.exports = {
   ci: {
     collect: {
       // Run against local dev server - IDs must match test-seed-data.sql
       url: [
-        "http://localhost:8000/",
-        "http://localhost:8000/stamp/1384305",
-        "http://localhost:8000/src20",
-        "http://localhost:8000/src20/stamp",
-        "http://localhost:8000/block/820000",
-        "http://localhost:8000/wallet/bc1qkqqre5xuqk60xtt93j297zgg7t6x0ul7gwjmv4",
+        `${appBaseUrl}/`,
+        `${appBaseUrl}/stamp/1384305`,
+        `${appBaseUrl}/src20`,
+        `${appBaseUrl}/src20/stamp`,
+        `${appBaseUrl}/block/820000`,
+        `${appBaseUrl}/wallet/bc1qkqqre5xuqk60xtt93j297zgg7t6x0ul7gwjmv4`,
       ],
       // Number of runs per URL for more stable results
       numberOfRuns: 3,

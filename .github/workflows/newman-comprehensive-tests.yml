@@ -625,9 +625,6 @@ jobs:
       ANTHROPIC_API_KEY: test-anthropic-key
       PERPLEXITY_API_KEY: test-perplexity-key
       # Mock external APIs for POST endpoint testing (Counterparty, mempool.space, Blockstream)
-      XCP_API_URL: http://localhost:18443/v2
-      MEMPOOL_API_URL: http://localhost:18443/mempool/api
-      BLOCKSTREAM_API_URL: http://localhost:18443/blockstream/api
 
     steps:
       - name: Resolve service container ports
@@ -688,6 +685,9 @@ jobs:
           mysql -h 127.0.0.1 -P "$DB_PORT" -u root -ptest btcstamps_test -e "SELECT COUNT(*) AS block_count FROM blocks;"
           echo "✅ Test data verified"
 
+      - name: Allocate isolated local application ports
+        run: node scripts/allocate-ci-ports.cjs >> "$GITHUB_ENV"
+
       - name: Cache Deno dependencies for dev server
         run: |
           echo "Caching Deno dependencies..."
@@ -702,7 +702,7 @@ jobs:
 
           # Wait for mock server to be ready
           # shellcheck disable=SC2016 # the inner shell expands the exported variables
-          timeout 15 bash -c 'until curl -f -s http://localhost:18443/health > /dev/null 2>&1; do
+          timeout 15 bash -c 'until curl -f -s http://127.0.0.1:${MOCK_API_PORT}/health > /dev/null 2>&1; do
             echo "Mock server not ready yet, waiting..."
             sleep 1
           done' || {
@@ -724,9 +724,9 @@ jobs:
           DB_PASSWORD=test \
           DB_NAME=btcstamps_test \
           REDIS_URL="$REDIS_URL" \
-          XCP_API_URL=http://localhost:18443/v2 \
-          MEMPOOL_API_URL=http://localhost:18443/mempool/api \
-          BLOCKSTREAM_API_URL=http://localhost:18443/blockstream/api \
+          XCP_API_URL=http://127.0.0.1:${MOCK_API_PORT}/v2 \
+          MEMPOOL_API_URL=http://127.0.0.1:${MOCK_API_PORT}/mempool/api \
+          BLOCKSTREAM_API_URL=http://127.0.0.1:${MOCK_API_PORT}/blockstream/api \
           nohup deno run -A dev.ts > dev-server.log 2>&1 &
 
           echo "Dev server started with PID: $!"
@@ -734,7 +734,7 @@ jobs:
 
           echo "Waiting for dev server to be ready (max 60s)..."
           # shellcheck disable=SC2016 # the inner shell expands the exported variables
-          timeout 300 bash -c 'until curl -f -s http://localhost:8000/api/v2/health > /dev/null 2>&1; do
+          timeout 300 bash -c 'until curl -f -s http://127.0.0.1:${STAMPCHAIN_PORT}/api/v2/health > /dev/null 2>&1; do
             echo "Dev server not ready yet, waiting..."
             sleep 2
           done' || {
@@ -744,12 +744,12 @@ jobs:
             exit 1
           }
 
-          echo "✅ Dev server is ready at http://localhost:8000"
+          echo "✅ Dev server is ready at http://127.0.0.1:${STAMPCHAIN_PORT}"
 
       - name: Verify dev server health
         run: |
           echo "Checking dev server health endpoint..."
-          curl -f http://localhost:8000/api/v2/health || {
+          curl -f http://127.0.0.1:${STAMPCHAIN_PORT}/api/v2/health || {
             echo "❌ Health check failed"
             exit 1
           }
@@ -783,9 +783,9 @@ jobs:
 
           # Run Newman tests pointing to localhost with comprehensive seed data
           newman run tests/postman/collections/comprehensive.json \
-            --env-var dev_base_url=http://localhost:8000 \
-            --env-var prod_base_url=http://localhost:8000 \
-            --env-var baseUrl=http://localhost:8000 \
+            --env-var dev_base_url=http://127.0.0.1:${STAMPCHAIN_PORT} \
+            --env-var prod_base_url=http://127.0.0.1:${STAMPCHAIN_PORT} \
+            --env-var baseUrl=http://127.0.0.1:${STAMPCHAIN_PORT} \
             --env-var test_block=820000 \
             --env-var test_stamp_id=1384305 \
             --env-var test_cpid=A888354448084788958 \
@@ -811,7 +811,7 @@ jobs:
             echo "## Newman Local Dev Test Results"
             echo ""
             echo "### Configuration"
-            echo "- Base URL: http://localhost:8000"
+            echo "- Base URL: http://127.0.0.1:${STAMPCHAIN_PORT}"
             echo "- Collection: tests/postman/collections/comprehensive.json"
             echo "- Environment: Local dev server with MySQL + Redis"
             echo ""
@@ -840,7 +840,7 @@ jobs:
           echo "Running schema contract tests against local dev server..."
 
           newman run tests/postman/collections/schema-contract-tests.json \
-            --env-var base_url=http://localhost:8000 \
+            --env-var base_url=http://127.0.0.1:${STAMPCHAIN_PORT} \
             --env-var test_block=820000 \
             --env-var test_stamp_id=1384305 \
             --env-var test_address=bc1qkqqre5xuqk60xtt93j297zgg7t6x0ul7gwjmv4 \
@@ -859,7 +859,7 @@ jobs:
             echo "## Schema Contract Test Results (Local Dev)"
             echo ""
             echo "- Collection: schema-contract-tests.json (20 endpoints)"
-            echo "- Target: Local dev server (http://localhost:8000)"
+            echo "- Target: Local dev server (http://127.0.0.1:${STAMPCHAIN_PORT})"
             echo ""
 
             if [ -f "reports/newman-local-dev/schema-contract-report.json" ]; then
