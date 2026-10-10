@@ -56,9 +56,6 @@ jobs:
       QUICKNODE_API_KEY: test-quicknode-key
       ANTHROPIC_API_KEY: test-anthropic-key
       PERPLEXITY_API_KEY: test-perplexity-key
-      XCP_API_URL: http://localhost:18443/v2
-      MEMPOOL_API_URL: http://localhost:18443/mempool/api
-      BLOCKSTREAM_API_URL: http://localhost:18443/blockstream/api
       LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
     steps:
@@ -112,6 +109,9 @@ jobs:
           mysql -h 127.0.0.1 -P "$DB_PORT" -u root -ptest btcstamps_test < scripts/test-seed-data.sql
           echo "✅ Test seed data loaded"
 
+      - name: Allocate isolated local application ports
+        run: node scripts/allocate-ci-ports.cjs >> "$GITHUB_ENV"
+
       - name: Cache Deno dependencies for dev server
         run: |
           echo "Caching Deno dependencies..."
@@ -125,7 +125,7 @@ jobs:
           echo "Mock server started with PID: $(cat mock-api-server.pid)"
 
           # shellcheck disable=SC2016 # the inner shell expands the exported variables
-          timeout 15 bash -c 'until curl -f -s http://localhost:18443/health > /dev/null 2>&1; do
+          timeout 15 bash -c 'until curl -f -s http://127.0.0.1:${MOCK_API_PORT}/health > /dev/null 2>&1; do
             echo "Mock server not ready yet, waiting..."
             sleep 1
           done' || {
@@ -144,7 +144,7 @@ jobs:
 
           echo "Waiting for dev server to be ready (max 90s)..."
           # shellcheck disable=SC2016 # the inner shell expands the exported variables
-          timeout 300 bash -c 'until curl -f -s http://localhost:8000/api/v2/health > /dev/null 2>&1; do
+          timeout 300 bash -c 'until curl -f -s http://127.0.0.1:${STAMPCHAIN_PORT}/api/v2/health > /dev/null 2>&1; do
             echo "Dev server not ready yet, waiting..."
             sleep 3
           done' || {
@@ -154,12 +154,12 @@ jobs:
             exit 1
           }
 
-          echo "✅ Dev server is ready at http://localhost:8000"
+          echo "✅ Dev server is ready at http://127.0.0.1:${STAMPCHAIN_PORT}"
 
       - name: Verify server is responding
         run: |
           echo "Testing server endpoints..."
-          curl -f http://localhost:8000/api/v2/health || exit 1
+          curl -f http://127.0.0.1:${STAMPCHAIN_PORT}/api/v2/health || exit 1
           echo ""
           echo "✅ Server is responding correctly"
 
@@ -232,6 +232,15 @@ jobs:
         run: |
           echo "=== Dev Server Logs ==="
           cat dev-server.log || echo "No dev server logs available"
+
+      - name: Diagnose browser navigation on failure
+        if: failure()
+        run: |
+          curl --noproxy '*' --max-time 5 --silent --head http://127.0.0.1:${STAMPCHAIN_PORT}/ | sed -n '/^HTTP\//p; /^Location:/Ip'
+          timeout 20 "$CHROME_PATH" --headless --no-sandbox --disable-dev-shm-usage \
+            --log-net-log=chrome-navigation-netlog.json --dump-dom http://127.0.0.1:${STAMPCHAIN_PORT}/ \
+            > chrome-navigation.html 2> chrome-navigation.log || true
+          node -e 'const fs = require("fs"); const p = "chrome-navigation-netlog.json"; if (fs.existsSync(p)) { const v = JSON.parse(fs.readFileSync(p, "utf8")); console.log(JSON.stringify(v.events.filter(e => e.params && e.params.net_error).map(e => ({type: e.type, netError: e.params.net_error})).slice(-20))); } const html = fs.readFileSync("chrome-navigation.html", "utf8"); console.log(html.match(/<title>[^<]*<\/title>/)?.[0] || "No document title");'
 
       - name: Cleanup
         if: always()

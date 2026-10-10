@@ -67,7 +67,9 @@ if (import.meta.main) {
       console.log(`[MAIN] Network profile: ${profile.name}`);
     } catch (e) {
       console.error(
-        `[MAIN ERROR] Network profile check failed: ${e instanceof Error ? e.message : String(e)}`,
+        `[MAIN ERROR] Network profile check failed: ${
+          e instanceof Error ? e.message : String(e)
+        }`,
       );
       Deno.exit(1);
     }
