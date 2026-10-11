@@ -102,6 +102,9 @@ export class FeeServiceDI {
    * Get fee data with caching and comprehensive fallback
    */
   async getFeeData(): Promise<FeeData> {
+    if (nativeReaderRequested()) {
+      throw new Error("Owned SQL reader has no qualified fee authority");
+    }
     const startTime = Date.now();
 
     try {
@@ -387,3 +390,4 @@ export class FeeServiceDI {
     return this.dependencies.feeProviders.map(p => p.getName());
   }
 }
+import { nativeReaderRequested } from "$server/database/nativeReaderProfile.ts";

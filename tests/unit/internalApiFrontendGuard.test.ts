@@ -7,15 +7,19 @@ import {
 } from "jsr:@std/testing@1.0.14/bdd";
 import { returnsNext, stub } from "@std/testing@1.0.14/mock";
 import { InternalApiFrontendGuard } from "$/server/services/security/internalApiFrontendGuard.ts";
+import { logger } from "$lib/utils/logger.ts";
 import { ApiResponseUtil } from "$lib/utils/api/responses/apiResponseUtil.ts";
 
 describe("InternalApiFrontendGuard", () => {
   let originalEnv: string | undefined;
   let apiResponseStub: any;
+  let warningStub: ReturnType<typeof stub>;
 
   beforeEach(() => {
     // Save original env
     originalEnv = Deno.env.get("DENO_ENV");
+
+    warningStub = stub(logger, "warn", () => {});
 
     // Mock ApiResponseUtil.forbidden
     apiResponseStub = stub(
@@ -35,6 +39,7 @@ describe("InternalApiFrontendGuard", () => {
 
     // Restore stubs
     apiResponseStub.restore();
+    warningStub.restore();
   });
 
   describe("Development Environment", () => {
@@ -49,6 +54,7 @@ describe("InternalApiFrontendGuard", () => {
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
 
       assertEquals(result, null);
+      assertEquals(warningStub.calls.length, 0);
     });
   });
 
@@ -67,6 +73,7 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertEquals(result, null);
+      assertEquals(warningStub.calls.length, 0);
     });
 
     it("should block requests with invalid API key", () => {
@@ -78,6 +85,8 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertExists(result);
+      assertEquals(warningStub.calls.length, 1);
+      assertEquals(warningStub.calls[0].args[0], "security");
     });
 
     it("should block requests without API key when one is expected", () => {
@@ -85,6 +94,8 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertExists(result);
+      assertEquals(warningStub.calls.length, 1);
+      assertEquals(warningStub.calls[0].args[0], "security");
     });
   });
 
@@ -102,6 +113,7 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertEquals(result, null);
+      assertEquals(warningStub.calls.length, 0);
     });
 
     it("should allow requests from www.stampchain.io origin", () => {
@@ -113,6 +125,7 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertEquals(result, null);
+      assertEquals(warningStub.calls.length, 0);
     });
 
     it("should block requests from external origins", () => {
@@ -124,6 +137,8 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertExists(result);
+      assertEquals(warningStub.calls.length, 1);
+      assertEquals(warningStub.calls[0].args[0], "security");
     });
 
     it("should block requests with subdomain attacks", () => {
@@ -135,6 +150,8 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertExists(result);
+      assertEquals(warningStub.calls.length, 1);
+      assertEquals(warningStub.calls[0].args[0], "security");
     });
   });
 
@@ -152,6 +169,7 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertEquals(result, null);
+      assertEquals(warningStub.calls.length, 0);
     });
 
     it("should block requests with invalid referer", () => {
@@ -163,6 +181,8 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertExists(result);
+      assertEquals(warningStub.calls.length, 1);
+      assertEquals(warningStub.calls[0].args[0], "security");
     });
   });
 
@@ -182,6 +202,7 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertEquals(result, null);
+      assertEquals(warningStub.calls.length, 0);
     });
 
     it("should block non-browser requests with host header", () => {
@@ -195,6 +216,8 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertExists(result);
+      assertEquals(warningStub.calls.length, 1);
+      assertEquals(warningStub.calls[0].args[0], "security");
     });
 
     it("should detect various browser user agents", () => {
@@ -215,6 +238,7 @@ describe("InternalApiFrontendGuard", () => {
 
         const result = InternalApiFrontendGuard.requireInternalAccess(req);
         assertEquals(result, null);
+        assertEquals(warningStub.calls.length, 0);
       }
     });
   });
@@ -235,6 +259,7 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertEquals(result, null);
+      assertEquals(warningStub.calls.length, 0);
     });
 
     it("should validate X-Forwarded-Host through CloudFlare", () => {
@@ -248,6 +273,8 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertExists(result);
+      assertEquals(warningStub.calls.length, 1);
+      assertEquals(warningStub.calls[0].args[0], "security");
     });
 
     it("should require both CF headers for CloudFlare validation", () => {
@@ -261,6 +288,8 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertExists(result);
+      assertEquals(warningStub.calls.length, 1);
+      assertEquals(warningStub.calls[0].args[0], "security");
     });
   });
 
@@ -278,6 +307,8 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertExists(result);
+      assertEquals(warningStub.calls.length, 1);
+      assertEquals(warningStub.calls[0].args[0], "security");
     });
 
     it("should handle empty headers", () => {
@@ -287,6 +318,8 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertExists(result);
+      assertEquals(warningStub.calls.length, 1);
+      assertEquals(warningStub.calls[0].args[0], "security");
     });
 
     it("should handle domain-only strings in origin check", () => {
@@ -298,6 +331,7 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertEquals(result, null);
+      assertEquals(warningStub.calls.length, 0);
     });
 
     it("should block requests with no identifying headers", () => {
@@ -305,6 +339,8 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertExists(result);
+      assertEquals(warningStub.calls.length, 1);
+      assertEquals(warningStub.calls[0].args[0], "security");
     });
   });
 
@@ -324,6 +360,7 @@ describe("InternalApiFrontendGuard", () => {
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
       assertEquals(result, null);
+      assertEquals(warningStub.calls.length, 0);
     });
 
     it("should check origin if API key is invalid", () => {
@@ -335,7 +372,8 @@ describe("InternalApiFrontendGuard", () => {
       });
 
       const result = InternalApiFrontendGuard.requireInternalAccess(req);
-      assertEquals(result, null); // Should pass due to valid origin
+      assertEquals(result, null);
+      assertEquals(warningStub.calls.length, 0); // Should pass due to valid origin
     });
   });
 });

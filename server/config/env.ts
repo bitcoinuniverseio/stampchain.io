@@ -1,3 +1,5 @@
+import { nativeReaderRequested } from "../database/nativeReaderProfile.ts";
+
 // BROWSER GUARD: This file must be safe even if accidentally bundled into client code
 // Only execute server-side Deno code when NOT in browser and Deno is available
 if (typeof window === "undefined" && typeof Deno !== "undefined") {
@@ -8,7 +10,8 @@ if (typeof window === "undefined" && typeof Deno !== "undefined") {
   const isTest = envMode === "test";
 
   // Skip Redis for build, test, or dev mode (unless forced)
-  (globalThis as any).SKIP_REDIS_CONNECTION = isBuild || isTest ||
+  (globalThis as any).SKIP_REDIS_CONNECTION = nativeReaderRequested() ||
+    isBuild || isTest ||
     (skipRedisForDev && Deno.env.get("FORCE_REDIS_CONNECTION") !== "true");
 
   // Load environment variables from .env file
@@ -30,8 +33,12 @@ DENO_ENV:                 ${Deno.env.get("DENO_ENV") || "not set"}
 ELASTICACHE_ENDPOINT:     ${Deno.env.get("ELASTICACHE_ENDPOINT") || "not set"}
 Build mode:               ${isBuild ? "yes" : "no"}
 Skip Redis for dev:       ${skipRedisForDev ? "yes" : "no"}
-Force Redis connection:   ${Deno.env.get("FORCE_REDIS_CONNECTION") === "true" ? "yes" : "no"}
-SKIP_REDIS_CONNECTION:    ${(globalThis as any).SKIP_REDIS_CONNECTION ? "yes" : "no"}
+Force Redis connection:   ${
+      Deno.env.get("FORCE_REDIS_CONNECTION") === "true" ? "yes" : "no"
+    }
+SKIP_REDIS_CONNECTION:    ${
+      (globalThis as any).SKIP_REDIS_CONNECTION ? "yes" : "no"
+    }
 *************************************************************************
 `;
 
