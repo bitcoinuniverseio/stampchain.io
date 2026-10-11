@@ -169,3 +169,93 @@ Deno.test("metadata final completion after deadline refuses even before timer ru
     Date.now = oldNow;
   }
 });
+
+Deno.test("production owned profile skips Redis while ordinary production remains enabled", async () => {
+  const { equal } = await import("node:assert");
+  for (
+    const [profile, expected] of [["owned-unix-readonly", "true"], [
+      "",
+      "false",
+    ]]
+  ) {
+    const code = `if(${
+      JSON.stringify(profile)
+    })Deno.env.set("DB_READER_PROFILE",${
+      JSON.stringify(profile)
+    });else Deno.env.delete("DB_READER_PROFILE");await import("./server/config/env.ts");console.log("SKIP_PROOF="+globalThis.SKIP_REDIS_CONNECTION);`;
+    const result = await new Deno.Command(Deno.execPath(), {
+      args: [
+        "eval",
+        "--frozen",
+        "--lock=deno.lock",
+        "--config=deno.json",
+        "--no-check",
+        code,
+      ],
+      cwd: Deno.cwd(),
+      env: { DENO_ENV: "production", FORCE_REDIS_CONNECTION: "true" },
+      stdout: "piped",
+      stderr: "piped",
+    }).output();
+    equal(result.code, 0);
+    equal(
+      new TextDecoder().decode(result.stdout).includes(
+        "SKIP_PROOF=" + expected,
+      ),
+      true,
+    );
+  }
+});
+Deno.test("unknown requested production reader profile refuses before Redis eligibility", async () => {
+  const { equal } = await import("node:assert");
+  const result = await new Deno.Command(Deno.execPath(), {
+    args: [
+      "eval",
+      "--frozen",
+      "--lock=deno.lock",
+      "--config=deno.json",
+      "--no-check",
+      'Deno.env.set("DB_READER_PROFILE","invalid");await import("./server/config/env.ts");console.log("UNEXPECTED_ADMISSION");',
+    ],
+    cwd: Deno.cwd(),
+    env: { DENO_ENV: "production" },
+    stdout: "piped",
+    stderr: "piped",
+  }).output();
+  equal(result.code !== 0, true);
+  equal(
+    new TextDecoder().decode(result.stderr).includes(
+      "Unknown native database reader profile",
+    ),
+    true,
+  );
+  equal(
+    new TextDecoder().decode(result.stdout).includes("UNEXPECTED_ADMISSION"),
+    false,
+  );
+});
+
+Deno.test("owned production Redis wrapper never opens a network connection", async () => {
+  const { equal } = await import("node:assert");
+  const code =
+    `Deno.env.set("DB_READER_PROFILE","owned-unix-readonly");await import("./server/config/env.ts");let calls=0;Deno.connect=()=>{calls++;throw Error("unexpected redis connect");};Deno.connectTls=()=>{calls++;throw Error("unexpected redis tls");};const redis=await import("./server/cache/redisClient.ts");await redis.getRedisConnection();console.log("NETWORK_CALLS="+calls);`;
+  const result = await new Deno.Command(Deno.execPath(), {
+    args: [
+      "eval",
+      "--frozen",
+      "--lock=deno.lock",
+      "--config=deno.json",
+      "--no-check",
+      code,
+    ],
+    cwd: Deno.cwd(),
+    env: { DENO_ENV: "production", FORCE_REDIS_CONNECTION: "true" },
+    stdout: "piped",
+    stderr: "piped",
+  }).output();
+  equal(result.code, 0);
+  equal(
+    new TextDecoder().decode(result.stdout).includes("NETWORK_CALLS=0"),
+    true,
+  );
+});
