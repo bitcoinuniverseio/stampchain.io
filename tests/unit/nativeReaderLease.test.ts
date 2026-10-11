@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { throws as assertThrows } from "node:assert";
 import {
   boundedMetadataConnection,
@@ -192,7 +193,7 @@ Deno.test("production owned profile skips Redis while ordinary production remain
         "--no-check",
         code,
       ],
-      cwd: Deno.cwd(),
+      cwd: fileURLToPath(new URL("../../", import.meta.url)),
       env: { DENO_ENV: "production", FORCE_REDIS_CONNECTION: "true" },
       stdout: "piped",
       stderr: "piped",
@@ -217,7 +218,7 @@ Deno.test("unknown requested production reader profile refuses before Redis elig
       "--no-check",
       'Deno.env.set("DB_READER_PROFILE","invalid");await import("./server/config/env.ts");console.log("UNEXPECTED_ADMISSION");',
     ],
-    cwd: Deno.cwd(),
+    cwd: fileURLToPath(new URL("../../", import.meta.url)),
     env: { DENO_ENV: "production" },
     stdout: "piped",
     stderr: "piped",
@@ -248,7 +249,7 @@ Deno.test("owned production Redis wrapper never opens a network connection", asy
       "--no-check",
       code,
     ],
-    cwd: Deno.cwd(),
+    cwd: fileURLToPath(new URL("../../", import.meta.url)),
     env: { DENO_ENV: "production", FORCE_REDIS_CONNECTION: "true" },
     stdout: "piped",
     stderr: "piped",
