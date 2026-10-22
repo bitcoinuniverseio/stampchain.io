@@ -15,6 +15,8 @@ import {
 import { Client } from "mysql/mod.ts";
 import { nativeReaderSettings, verifyNativeReaderProfile, requireNativeProbeReply, prepareNativeReaderConnection } from "./nativeReaderProfile.ts";
 import { NativeReaderWork } from "./nativeReaderWork.ts";
+import { admitNativeReaderLease } from "./nativeReaderLease.ts";
+import { applicationWork } from "$server/lifecycle/workDrain.ts";
 // Conditionally import Redis based on build mode
 // BROWSER GUARD: Only access Deno when available (server-side)
 let connect: any;
@@ -90,8 +92,33 @@ function shouldInitializeRedis(): boolean {
 
 class DatabaseManager {
   readonly #nativeSettings = nativeReaderSettings();
-  readonly #nativeWork = new NativeReaderWork();
+  readonly #nativeWork = new NativeReaderWork(async () => {
+    await this.admitNativeOperation();
+  }, (actual) => applicationWork.retain(actual));
+
+  protected async admitNativeOperation(): Promise<void> {
+    if (!this.#nativeSettings) throw new Error("Native reader profile absent");
+    const proof = await verifyNativeReaderProfile(this.#nativeSettings);
+    await admitNativeReaderLease(
+      proof,
+      () => this.#nativeWork.assertAdmitted(),
+      () => this.#nativeWork.remainingBudgetMs(),
+    );
+  }
   #pool: Client[] = [];
+  #stoppingProducers = false;
+
+  stopProducers(): void {
+    this.#stoppingProducers = true;
+    if (this.#keepAliveInterval) {
+      clearInterval(this.#keepAliveInterval);
+      this.#keepAliveInterval = undefined;
+    }
+  }
+
+  observeDriver<T>(operation: () => Promise<T>): Promise<T> {
+    return applicationWork.run(operation);
+  }
   #activeConnections = 0; // Track active connections
   #redisClient: any | undefined; // Redis client type
   #isConnectingRedis = false;
@@ -183,7 +210,8 @@ class DatabaseManager {
 
     const handlerNames = ["console"];
 
-    if (!isTest) {
+    // The owned reader source tree is immutable; logs stay on its stdout.
+    if (!isTest && !this.#nativeSettings) {
       handlers.file = new FileHandler("WARN", {
         filename: "./db.log",
         formatter: (logRecord: LogRecord) => {
@@ -214,7 +242,7 @@ class DatabaseManager {
       // Increment immediately on pop so closeClient()'s decrement correctly
       // cancels if validation fails. Previously we only incremented on success,
       // which made closeClient on a popped-but-not-yet-counted client
-      // double-decrement the counter — leading to long-running counter drift
+      // double-decrement the counter â€” leading to long-running counter drift
       // toward negative values, which let getClient() create connections past
       // CONNECTION_LIMIT under steady churn (root cause of 2026-05-14 ERROR
       // 1040 incident: stamps_app accumulated 120 conns from 1 task with
@@ -279,7 +307,7 @@ class DatabaseManager {
     try {
       await this.#nativeWork.run(async () => {
         try {
-          requireNativeProbeReply(await client.query("SELECT 1 AS native_reader_probe"));
+          requireNativeProbeReply(await this.observeDriver(() => client.query("SELECT 1 AS native_reader_probe")));
           this.#nativeWork.assertAdmitted();
           if (Date.now() >= deadline) throw new Error("Native validation deadline exceeded");
           if (callerFailed) throw new Error("Native validation completed after caller deadline");
@@ -333,7 +361,7 @@ class DatabaseManager {
   async #validateConnection(client: Client): Promise<void> {
     if (this.#nativeSettings) {
       await this.#nativeWork.run(async () => {
-        const rows = await client.query("SELECT 1 AS native_reader_probe");
+        const rows = await this.observeDriver(() => client.query("SELECT 1 AS native_reader_probe"));
         requireNativeProbeReply(rows);
       }, 4000);
       return;
@@ -342,7 +370,7 @@ class DatabaseManager {
       setTimeout(() => reject(new Error(`Connection validation timeout after ${this.#VALIDATION_TIMEOUT}ms`)), this.#VALIDATION_TIMEOUT);
     });
 
-    const validationPromise = client.query("SELECT 1");
+    const validationPromise = this.observeDriver(() => client.query("SELECT 1"));
 
     try {
       await Promise.race([validationPromise, timeoutPromise]);
@@ -419,6 +447,7 @@ class DatabaseManager {
   }
 
   async closeAllClients(): Promise<void> {
+    const closeFailures: unknown[] = [];
     if (this.#nativeSettings) {
       this.#nativeWork.stopAdmission();
       await this.#nativeWork.drain();
@@ -431,6 +460,7 @@ class DatabaseManager {
 
     // Close Redis connection
     if (this.#redisClient) {
+      let redisClosed = false;
       try {
         // Check if Redis client has a close/quit method
         if (typeof this.#redisClient.quit === 'function') {
@@ -439,15 +469,23 @@ class DatabaseManager {
           await this.#redisClient.close();
         }
         console.log('[REDIS CLEANUP] Redis connection closed');
+        redisClosed = true;
       } catch (error) {
         console.log(`[REDIS CLEANUP ERROR] ${error instanceof Error ? error.message : error}`);
+        closeFailures.push(error);
       } finally {
-        this.#redisClient = undefined;
+        if (redisClosed) this.#redisClient = undefined;
         this.#redisAvailable = false;
       }
     }
 
-    await Promise.all(this.#pool.map((client) => this.closeClient(client)));
+    const closed = await Promise.allSettled(this.#pool.map((client) => this.closeClient(client)));
+    for (const result of closed) {
+      if (result.status === "rejected") closeFailures.push(result.reason);
+    }
+    if (closeFailures.length) {
+      throw new AggregateError(closeFailures, "Database resource closure remains uncertain");
+    }
   }
 
   async executeQuery<T>(query: string, params: unknown[]): Promise<T> {
@@ -458,8 +496,9 @@ class DatabaseManager {
         let reusable = false;
         try {
           this.#nativeWork.assertAdmitted();
-          const result = await client.execute(query, params);
-          await this.verifyNativeProfile();
+          const result = await this.observeDriver(() => client.execute(query, params));
+          await this.admitNativeOperation();
+          this.#nativeWork.assertAdmitted();
           reusable = true;
           return result as T;
         } finally {
@@ -475,7 +514,8 @@ class DatabaseManager {
 
         // Test connection before executing query
         try {
-          await client.execute("SELECT 1", []);
+          const checkingClient = client;
+          await this.observeDriver(() => checkingClient.execute("SELECT 1", []));
         } catch (_pingError) {
           this.#logger.warn("Connection ping failed, removing from pool");
           if (client) {
@@ -486,7 +526,8 @@ class DatabaseManager {
           client = await this.getClient();
         }
 
-        const result = await client.execute(query, params);
+        const executingClient = client;
+        const result = await this.observeDriver(() => executingClient.execute(query, params));
         this.releaseClient(client);
         return result as T;
       } catch (error) {
@@ -713,7 +754,7 @@ class DatabaseManager {
         };
       } catch {
         console.warn(
-          `[DB TLS] CA cert not found at "${caCertPath}" — falling back to plaintext. ` +
+          `[DB TLS] CA cert not found at "${caCertPath}" â€” falling back to plaintext. ` +
           `This will fail with MySQL 8.4 caching_sha2_password. ` +
           `Run: curl -o certs/rds-ca-bundle.pem https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem`,
         );
@@ -726,7 +767,7 @@ class DatabaseManager {
 
     // Add connection timeout to prevent hanging
     const connectWithTimeout = () => {
-      const connectionPromise = client.connect(connectionOptions);
+      const connectionPromise = this.observeDriver(() => client.connect(connectionOptions));
 
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error(`Database connection timeout after ${this.#ACQUIRE_TIMEOUT}ms to ${DB_HOST}:${DB_PORT}`)), this.#ACQUIRE_TIMEOUT);
@@ -739,7 +780,7 @@ class DatabaseManager {
 
     // Set session timezone to UTC to ensure consistent timestamp handling
     try {
-      await client.execute("SET time_zone = '+00:00'", []);
+      await this.observeDriver(() => client.execute("SET time_zone = '+00:00'", []));
       this.#logger.debug("Set MySQL session timezone to UTC");
     } catch (error) {
       this.#logger.warn("Failed to set session timezone", error);
@@ -749,6 +790,7 @@ class DatabaseManager {
   }
 
   private startKeepAlive(): void {
+    if (this.#stoppingProducers) return;
     // Clear any existing interval
     if (this.#keepAliveInterval) {
       clearInterval(this.#keepAliveInterval);
@@ -769,7 +811,7 @@ class DatabaseManager {
           for (const client of this.#pool) {
             try {
               // Execute a simple query to keep connection alive
-              await client.execute("SELECT 1", []);
+              await this.observeDriver(() => client.execute("SELECT 1", []));
             } catch (error) {
               this.#logger.warn("Keep-alive failed for connection, marking for removal", error);
               connectionsToRemove.push(client);
@@ -932,8 +974,8 @@ class DatabaseManager {
         throw new Error(`Test key verification failed: expected "success" but got "${value}"`);
       }
 
-      console.log(`[REDIS CONNECTION SUCCESS] ✅ Connected to Redis successfully with verified read/write`);
-      this.#logger.info("✅ Connected to Redis successfully with verified read/write");
+      console.log(`[REDIS CONNECTION SUCCESS] âœ… Connected to Redis successfully with verified read/write`);
+      this.#logger.info("âœ… Connected to Redis successfully with verified read/write");
       this.#redisAvailable = true;
       this.#redisRetryCount = 0;
       
@@ -959,6 +1001,7 @@ class DatabaseManager {
   }
 
   async #connectToRedisInBackground(): Promise<void> {
+    if (this.#stoppingProducers) return;
     if (this.#isConnectingRedis) {
       console.log(`[REDIS RECONNECT] Already attempting to reconnect, skipping duplicate request`);
       return;
@@ -984,7 +1027,7 @@ class DatabaseManager {
 
       console.log(`[REDIS RECONNECT] Attempting to reconnect to Redis at ${this.config.ELASTICACHE_ENDPOINT}:${Deno.env.get("REDIS_PORT") || 6379}`);
       await this.connectToRedis();
-      console.log(`[REDIS RECONNECT SUCCESS] ✅ Successfully reconnected to Redis`);
+      console.log(`[REDIS RECONNECT SUCCESS] âœ… Successfully reconnected to Redis`);
       
       // Clear in-memory cache after successful reconnection
       this.clearInMemoryCache();
@@ -1587,10 +1630,10 @@ class DatabaseManager {
             // Key no longer exists (expired between our get() and now); skip update
             continue;
           } else if (ttl > 0) {
-            // Key has a positive TTL — preserve it atomically
+            // Key has a positive TTL â€” preserve it atomically
             await this.#redisClient.set(cacheKey, JSON.stringify(parsed), { ex: ttl });
           } else {
-            // ttl === -1: key exists but has no expiry — apply DEFAULT_CACHE_DURATION
+            // ttl === -1: key exists but has no expiry â€” apply DEFAULT_CACHE_DURATION
             // to prevent permanent keys from accumulating
             await this.#redisClient.set(cacheKey, JSON.stringify(parsed), { ex: DEFAULT_CACHE_DURATION });
           }

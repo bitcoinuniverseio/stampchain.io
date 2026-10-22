@@ -2,6 +2,7 @@
   "lock": { "path": "./deno.lock", "frozen": true },
   "lockfile": "deno.lock",
   "tasks": {
+    "test:native-reader": "deno test --frozen --lock=deno.lock --allow-all native-reader-qa.ts",
     "start": "deno task check_version && deno cache --node-modules-dir main.ts server/middleware/openapiValidator.ts && deno run -A main.ts",
     "dev": "deno run -A --watch=routes/,islands/,components/,lib/,server/ --watch-exclude=_fresh/,node_modules/,coverage/,tmp/,dist/,fresh.gen.ts --no-clear-screen dev.ts --host",
     "dev:frontend": "deno run -A --watch=routes/,islands/,components/,static/,tailwind.config.ts --watch-exclude=_fresh/,node_modules/,coverage/,tmp/,dist/,server/,lib/server/ --no-clear-screen dev.ts --host",
