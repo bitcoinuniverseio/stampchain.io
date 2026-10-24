@@ -9,6 +9,10 @@ test("Newman serialized buffers and URL segments resolve actual local response c
   const body = JSON.stringify({ id: 1, name: null });
   for (const encoded of [body, Buffer.from(body), new Uint8Array(Buffer.from(body)), { type: "Buffer", data: [...Buffer.from(body)] }]) assert.equal(validator.decodeResponseBody(encoded), body);
   assert.equal(validator.extractEndpointPath({ protocol: "https", host: ["fixture", "invalid"], path: ["api", "v2", "stamps", "1"] }), "/api/v2/stamps/1");
+  const serializedUrl = JSON.parse(JSON.stringify({ protocol: "https", host: ["fixture", "invalid"], path: ["", "api", "v2", "stamps", "1"] }));
+  assert.equal(validator.extractEndpointPath(serializedUrl), "/api/v2/stamps/1");
+  assert.equal(validator.extractEndpointPath({ protocol: "https", host: "fixture.invalid", path: "/api/v2/stamps/1" }), "/api/v2/stamps/1");
+  assert.equal(validator.extractEndpointPath("https://fixture.invalid/v2/stamps/1?limit=10"), "/api/v2/stamps/1");
   assert.equal(validator.validateSchemaResponse("/api/v2/stamps/1", "GET", 200, body).valid, true);
   assert.equal(validator.validateSchemaResponse("/api/v2/stamps/count", "GET", 200, "12").valid, true);
   for (const bad of ["{}", '{"id":"1","name":"valid"}', '{"id":1.5,"name":"valid"}', validator.decodeResponseBody({ type: "Buffer", data: [256] })]) assert.equal(validator.validateSchemaResponse("/api/v2/stamps/1", "GET", 200, bad).valid, false);

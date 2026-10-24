@@ -400,8 +400,10 @@ class SchemaValidator {
     // Extract path from Newman URL object or string
     let urlString = url;
     if (typeof url === "object") {
+      const host = Array.isArray(url.host) ? url.host.join(".") : url.host;
+      const segments = Array.isArray(url.path) ? url.path.join("/") : url.path;
       urlString = url.raw ||
-        url.protocol + "://" + url.host.join(".") + "/" + url.path.join("/");
+        url.protocol + "://" + host + "/" + String(segments || "").replace(/^\/+/, "");
     }
 
     try {
