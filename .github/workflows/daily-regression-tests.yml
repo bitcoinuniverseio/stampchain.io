@@ -239,11 +239,13 @@ jobs:
           
           # Check for analysis files
           if [ -f "reports/expected-changes-validation.json" ]; then
-            unexpected_changes=$(jq -r '.summary.unexpectedChanges' reports/expected-changes-validation.json 2>/dev/null || echo "0")
-            if [ "$unexpected_changes" -gt "0" ]; then
-              critical_issues=$((critical_issues + unexpected_changes))
-              echo "❌ Found $unexpected_changes unexpected changes"
-            fi
+            schema_failures=$(jq -er '.summary.schemaFailures' reports/expected-changes-validation.json)
+            performance_failures=$(jq -er '.summary.criticalPerformanceIssues // .summary.unexpectedChanges' reports/expected-changes-validation.json)
+            critical_issues=$((schema_failures + performance_failures))
+            echo "Schema failures: $schema_failures; critical latency observations: $performance_failures"
+          else
+            critical_issues=1
+            echo "❌ Expected schema validation report is missing"
           fi
           
           # Check test results
@@ -273,6 +275,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const { canOpenRegressionIssue } = require('./scripts/regression-issue-capability.cjs');
+            if (!(await canOpenRegressionIssue({ github, context, core }))) return;
             const criticalIssues = '${{ steps.check-regressions.outputs.critical_issues }}';
             const warningIssues = '${{ steps.check-regressions.outputs.warning_issues }}';
             const timestamp = '${{ env.TIMESTAMP }}';
