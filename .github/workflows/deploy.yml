@@ -33,6 +33,9 @@ jobs:
       - name: Validate OpenAPI Schema
         run: npm run validate:ci
 
+      - name: Verify offline regression parser and issue capability
+        run: node --test scripts/validate-expected-changes.test.cjs scripts/regression-issue-capability.test.cjs
+
       # Note: We intentionally skip `npm audit` because:
       # 1. This is a Deno project - npm packages are dev-only tools
       # 2. Production security comes from Deno dependencies in deno.json
