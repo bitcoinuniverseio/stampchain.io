@@ -15,9 +15,9 @@ const path = require("path");
 const yaml = require("js-yaml");
 
 class SchemaValidator {
-  constructor() {
-    this.config = this.loadConfig();
-    this.schema = this.loadOpenAPISchema();
+  constructor({ config, schema } = {}) {
+    this.config = config || this.loadConfig();
+    this.schema = schema || this.loadOpenAPISchema();
     this.results = {
       timestamp: new Date().toISOString(),
       summary: {
@@ -26,6 +26,7 @@ class SchemaValidator {
         schemaFailures: 0,
         expectedChanges: 0,
         unexpectedChanges: 0,
+        criticalPerformanceIssues: 0,
         status: "success",
       },
       validationDetails: [],
@@ -157,7 +158,12 @@ class SchemaValidator {
   }
 
   validateSchemaResponse(endpoint, method, statusCode, responseBody) {
-    const pathDef = this.schema.paths?.[endpoint];
+    const pathDef = this.schema.paths?.[endpoint] || Object.entries(this.schema.paths || {})
+      .filter(([template]) => {
+        const expected = template.split("/"), actual = endpoint.split("/");
+        return expected.length === actual.length && expected.every((part, i) => part === actual[i] || /^\{[^{}]+\}$/.test(part) && actual[i] !== "");
+      })
+      .sort(([a], [b]) => (a.match(/\{/g) || []).length - (b.match(/\{/g) || []).length || a.localeCompare(b))[0]?.[1];
     if (!pathDef) {
       return {
         valid: false,
@@ -208,23 +214,42 @@ class SchemaValidator {
     }
   }
 
-  validateAgainstSchema(data, schema) {
+  validateAgainstSchema(data, schema, depth = 0) {
     // Simplified schema validation - in production, use ajv or similar
     const errors = [];
 
+    if (depth > 40) return { valid: false, errors: ["Schema recursion exceeds bound"] };
+    if (schema === false) return { valid: false, errors: ["Response schema rejects this value"] };
+    if (schema === true) return { valid: true };
+    if (!schema || typeof schema !== "object") return { valid: false, errors: ["Response schema is invalid"] };
+
     if (schema.$ref) {
-      // Handle schema references - simplified for now
-      return {
-        valid: true,
-        warning: "Schema reference validation not fully implemented",
-      };
+      if (!schema.$ref.startsWith("#/")) return { valid: false, errors: ["Only local schema references are supported"] };
+      const target = schema.$ref.slice(2).split("/").reduce((value, key) => value?.[key.replace(/~1/g, "/").replace(/~0/g, "~")], this.schema);
+      if (!target) return { valid: false, errors: [`Unresolved schema reference: ${schema.$ref}`] };
+      return this.validateAgainstSchema(data, target, depth + 1);
+    }
+
+    if (data === null && schema.nullable) return { valid: true };
+    const actualType = data === null ? "null" : Array.isArray(data) ? "array" : typeof data;
+    if (schema.type && !(schema.type === "integer" ? Number.isInteger(data) : schema.type === actualType)) return { valid: false, errors: [`Expected ${schema.type}, got ${actualType}`] };
+    if (schema.enum && !schema.enum.some(value => JSON.stringify(value) === JSON.stringify(data))) errors.push("Value is outside schema enum");
+    for (const part of schema.allOf || []) errors.push(...(this.validateAgainstSchema(data, part, depth + 1).errors || []));
+    for (const keyword of ["anyOf", "oneOf"]) {
+      if (schema[keyword]) {
+        const count = schema[keyword].filter(part => this.validateAgainstSchema(data, part, depth + 1).valid).length;
+        if (count === 0 || keyword === "oneOf" && count !== 1) errors.push(`Response does not satisfy ${keyword}`);
+      }
+    }
+    if (Array.isArray(data) && schema.items) {
+      data.forEach((value, index) => errors.push(...(this.validateAgainstSchema(value, schema.items, depth + 1).errors || []).map(error => `[${index}]: ${error}`)));
     }
 
     if (schema.type === "object" && schema.properties) {
       // Check required properties
       if (schema.required && this.config.schemaValidation.enforceRequired) {
         for (const requiredField of schema.required) {
-          if (!(requiredField in data)) {
+          if (!Object.hasOwn(data, requiredField)) {
             errors.push(`Missing required field: ${requiredField}`);
           }
         }
@@ -235,16 +260,9 @@ class SchemaValidator {
         for (
           const [propName, propSchema] of Object.entries(schema.properties)
         ) {
-          if (propName in data) {
+          if (Object.hasOwn(data, propName)) {
             const value = data[propName];
-            const expectedType = propSchema.type;
-            const actualType = Array.isArray(value) ? "array" : typeof value;
-
-            if (expectedType && expectedType !== actualType) {
-              errors.push(
-                `Type mismatch for ${propName}: expected ${expectedType}, got ${actualType}`,
-              );
-            }
+            errors.push(...(this.validateAgainstSchema(value, propSchema, depth + 1).errors || []).map(error => `${propName}: ${error}`));
           }
         }
       }
@@ -285,14 +303,19 @@ class SchemaValidator {
 
     console.log("Starting schema validation of Newman results...");
 
-    const executions = newmanData.run?.executions || [];
+    const executions = newmanData.run?.executions;
+    if (!Array.isArray(executions) || executions.length === 0) throw new Error("Newman report contains no executions");
     this.results.summary.totalTests = executions.length;
 
     for (const execution of executions) {
       const request = execution.request;
       const response = execution.response;
 
-      if (!request || !response) continue;
+      if (!request || !response) {
+        this.results.summary.schemaFailures++;
+        this.results.schemaViolations.push({ endpoint: "/unknown", method: request?.method || "unknown", schemaErrors: ["Newman execution is missing its request or response"] });
+        continue;
+      }
 
       const endpoint = this.extractEndpointPath(request.url);
       const method = request.method;
@@ -311,7 +334,7 @@ class SchemaValidator {
         endpoint,
         method,
         statusCode,
-        response.stream?.toString() || "{}",
+        this.decodeResponseBody(response.stream),
       );
 
       const validationResult = {
@@ -337,6 +360,7 @@ class SchemaValidator {
       // Check performance thresholds
       if (responseTime > this.config.performance.criticalThreshold) {
         validationResult.performanceIssue = "critical";
+        this.results.summary.criticalPerformanceIssues++;
         this.results.summary.unexpectedChanges++;
       } else if (responseTime > this.config.performance.warningThreshold) {
         validationResult.performanceIssue = "warning";
@@ -361,7 +385,15 @@ class SchemaValidator {
       `- Schema validations: ${this.results.summary.schemaValidations}`,
     );
     console.log(`- Schema failures: ${this.results.summary.schemaFailures}`);
+    console.log(`- Critical latency observations: ${this.results.summary.criticalPerformanceIssues}`);
     console.log(`- Status: ${this.results.summary.status}`);
+  }
+
+  decodeResponseBody(stream) {
+    if (typeof stream === "string") return stream;
+    if (Buffer.isBuffer(stream) || stream instanceof Uint8Array) return Buffer.from(stream).toString("utf8");
+    if (stream?.type === "Buffer" && Array.isArray(stream.data) && stream.data.every(value => Number.isInteger(value) && value >= 0 && value <= 255)) return Buffer.from(stream.data).toString("utf8");
+    return "invalid Newman response body";
   }
 
   extractEndpointPath(url) {
@@ -369,7 +401,7 @@ class SchemaValidator {
     let urlString = url;
     if (typeof url === "object") {
       urlString = url.raw ||
-        url.protocol + "://" + url.host.join(".") + url.path.join("/");
+        url.protocol + "://" + url.host.join(".") + "/" + url.path.join("/");
     }
 
     try {
@@ -419,7 +451,7 @@ class SchemaValidator {
     markdown +=
       `- **Schema Failures**: ${this.results.summary.schemaFailures}\n`;
     markdown +=
-      `- **Unexpected Changes**: ${this.results.summary.unexpectedChanges}\n\n`;
+      `- **Critical latency observations**: ${this.results.summary.criticalPerformanceIssues}\n\n`;
 
     if (this.results.schemaViolations.length > 0) {
       markdown += `## Schema Violations\n\n`;

@@ -4,6 +4,34 @@
 
 The daily regression testing system automatically monitors the API for unexpected changes, performance degradations, and endpoint availability issues. It runs comprehensive Newman tests against the production API daily and creates GitHub issues when critical regressions are detected.
 
+## Recovery notes, 24 October 2026
+
+Issue alerts first check the repository's current Issues capability. When
+Issues are disabled, the alert appears in the workflow summary with the run
+link. The regression gate still fails, and no repository settings change.
+Permission errors and other API failures are not suppressed.
+
+Schema analysis decodes Newman's JSON-serialized response buffers, resolves
+parameterized OpenAPI paths, and validates local schema references and nested
+types. Missing, malformed or empty reports cannot establish success. Actual
+schema failures and critical latency observations are counted separately and
+both remain fatal. The critical latency threshold is unchanged: a response
+over 5000 ms fails. The historical `unexpectedChanges` report field retains
+its latency count for compatibility; it does not prove a changed API field.
+
+The Universe fork's production deployment workflow is restricted to the
+upstream `stampchain-io/stampchain.io` repository. These monitoring workflows
+still name `https://stampchain.io`; their success is not proof of a
+Universe-owned deployment or blockchain source. This recovery was tested with
+offline fixtures only. No external production API was probed and no Mainnet
+transaction was executed. The earlier run's response reports were unavailable
+because artifact storage rejected their upload, so its individual runtime
+schema violations and latency cannot be classified as resolved.
+
+Artifact upload quota failures remain a separate unresolved infrastructure
+condition. Required evidence is not replaced by a successful local parser
+test or a disabled-Issues summary.
+
 ## Workflow Files
 
 ### Primary Workflow: `daily-regression-tests.yml`
