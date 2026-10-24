@@ -6,6 +6,14 @@ The daily regression testing system automatically monitors the API for unexpecte
 
 ## Recovery notes, 24 October 2026
 
+Pull requests run the comprehensive and schema-contract collections against
+the existing isolated local application, seeded MySQL and Redis, with mock
+upstream APIs. Both Newman base URLs point at that job's loopback port. The
+duplicate production-target comprehensive lane does not run for pull
+requests. Deployment performance benchmarking is restricted to protected
+main; pull-request response-time assertions remain in the local collections.
+Source quality, dependency and security checks still run for pull requests.
+
 Issue alerts first check the repository's current Issues capability. When
 Issues are disabled, the alert appears in the workflow summary with the run
 link. The regression gate still fails, and no repository settings change.

@@ -43,6 +43,8 @@ on:
 jobs:
   newman-comprehensive:
     name: Newman Integration Tests (Database Required)
+    # Pull requests run the same collection against the isolated local app below.
+    if: github.event_name != 'pull_request'
     runs-on: [self-hosted, universe-runners-1]
     timeout-minutes: 30
     

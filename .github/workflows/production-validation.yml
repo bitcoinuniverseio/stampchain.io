@@ -19,7 +19,7 @@ on:
 
 env:
   DENO_VERSION: "2.6.9"
-  NODE_VERSION: "18"
+  NODE_VERSION: "24.19.0"
 
 jobs:
   production-gates:
@@ -54,6 +54,9 @@ jobs:
   # Task 36 - Performance Benchmarking
   performance-benchmarking:
     name: Performance Benchmarking
+    # Deployment benchmarks belong to protected main, while PR API timing,
+    # comprehensive and schema assertions run against the isolated local app.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: [self-hosted, universe-runners-1]
     timeout-minutes: 45
     needs: [production-gates]
