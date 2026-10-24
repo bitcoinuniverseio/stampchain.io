@@ -4,6 +4,10 @@ on:
     branches: [main, dev, develop]
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   quality-checks:
     name: Quality Checks

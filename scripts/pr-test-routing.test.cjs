@@ -26,3 +26,16 @@ test("deployment benchmark remains on protected main and PR source gates remain 
   const source = fs.readFileSync(path.join(__dirname, "../.github/workflows/daily-regression-tests.yml"), "utf8");
   assert.match(source, /critical_issues=\$\(\(schema_failures \+ performance_failures\)\)/);
 });
+test("superseded PR checks cancel within each workflow while protected branch runs remain", () => {
+  for (const file of ["deploy.yml", "newman-comprehensive-tests.yml", "production-validation.yml"]) {
+    const rule = workflow(file).concurrency;
+    assert.equal(rule.group, "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}");
+    assert.equal(rule["cancel-in-progress"], "${{ github.event_name == 'pull_request' }}");
+  }
+  const lint = workflow("actionlint.yml").concurrency;
+  assert.ok(lint.group.includes("github.workflow"));
+  assert.ok(lint.group.includes("github.event.pull_request.head.repo.full_name || github.repository"));
+  assert.ok(lint.group.includes("github.head_ref || github.ref_name"));
+  assert.ok(lint["cancel-in-progress"].includes("github.ref != 'refs/heads/main'"));
+  assert.ok(lint["cancel-in-progress"].includes("github.ref != 'refs/heads/develop'"));
+});

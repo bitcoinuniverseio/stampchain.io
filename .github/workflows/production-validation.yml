@@ -17,6 +17,10 @@ on:
           - comprehensive
           - emergency
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   DENO_VERSION: "2.6.9"
   NODE_VERSION: "24.19.0"

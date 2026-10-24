@@ -14,6 +14,13 @@ requests. Deployment performance benchmarking is restricted to protected
 main; pull-request response-time assertions remain in the local collections.
 Source quality, dependency and security checks still run for pull requests.
 
+Each affected workflow cancels its own superseded pull-request revisions.
+Distinct required workflows keep distinct concurrency groups. Actionlint
+shares the branch group between duplicate same-repository push and PR events,
+while source repositories distinguish fork branch names. Protected main and
+develop push validation is retained. Obsolete CI cancellation does not restart
+runners or application services.
+
 Issue alerts first check the repository's current Issues capability. When
 Issues are disabled, the alert appears in the workflow summary with the run
 link. The regression gate still fails, and no repository settings change.

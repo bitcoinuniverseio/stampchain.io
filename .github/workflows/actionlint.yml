@@ -3,6 +3,12 @@ on:
   push:
   pull_request:
 
+concurrency:
+  # Same-repository push and PR events share one branch check; fork branch
+  # names remain isolated by their source repository.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' && github.event_name != 'workflow_dispatch' }}
+
 jobs:
   actionlint:
     runs-on: [self-hosted, universe-runners-1]

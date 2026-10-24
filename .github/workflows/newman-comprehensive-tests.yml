@@ -40,6 +40,10 @@ on:
     # Run daily at 2 AM UTC to validate production endpoints
     - cron: '0 2 * * *'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   newman-comprehensive:
     name: Newman Integration Tests (Database Required)
