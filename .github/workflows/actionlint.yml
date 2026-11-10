@@ -3,6 +3,11 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
 jobs:
   actionlint:
     runs-on: [self-hosted, Linux, X64, universe]
@@ -11,5 +16,7 @@ jobs:
       - uses: reviewdog/action-actionlint@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
+          reporter: github-pr-check
+          filter_mode: added
+          fail_on_error: false
 

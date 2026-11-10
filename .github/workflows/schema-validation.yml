@@ -116,6 +116,7 @@ jobs:
       - name: Upload Schema Validation Results
         if: always()
         uses: actions/upload-artifact@v7
+        continue-on-error: true
         with:
           name: schema-validation-results
           path: reports/schema-validation-results.json

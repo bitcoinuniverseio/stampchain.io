@@ -308,6 +308,7 @@ jobs:
 
       - name: Archive Compliance Report
         uses: actions/upload-artifact@v7
+        continue-on-error: true
         with:
           name: compliance-monitoring-report
           path: compliance-report.json

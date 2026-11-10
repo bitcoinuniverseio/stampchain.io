@@ -97,12 +97,13 @@ jobs:
       - name: Wait for MySQL
         run: |
           echo "Waiting for MySQL to be ready..."
-          # shellcheck disable=SC2016 # the inner shell expands the exported variables
-          timeout 60 bash -c 'until mysqladmin ping -h 127.0.0.1 -P "$DB_PORT" -u root -ptestpassword --silent; do
+          # The service healthcheck already runs mysqladmin inside the container.
+          # The fleet runner image does not ship a host mysqladmin; probe the published port.
+          timeout 60 bash -c 'until (echo > /dev/tcp/127.0.0.1/"$DB_PORT") >/dev/null 2>&1; do
             echo "MySQL not ready yet, waiting..."
             sleep 2
           done'
-          echo "MySQL is ready!"
+          echo "MySQL is ready"
 
       - name: Setup test database schema
         run: |

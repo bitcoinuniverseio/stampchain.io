@@ -3,6 +3,8 @@
 #   gh api orgs/bitcoinuniverseio/actions/runners --paginate -q '.runners[].labels[].name' | sort -u
 self-hosted-runner:
   labels:
+    - Linux
+    - X64
     - universe-runners-1
     - universe-super
     - primcast
