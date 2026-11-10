@@ -471,11 +471,9 @@ jobs:
               ;;
             *)
               # NOREPORT / unknown: Newman produced no parseable report. Surface as a
-              # distinct CI-infra failure so it is never mistaken for an API regression,
-              # and do NOT fail the regression gate on it (avoids perpetual red from
-              # an infra hiccup — the original #1138 symptom).
-              echo "::warning title=Newman report missing::Newman produced no parseable results JSON — CI/infra failure, not an API regression (verdict=${VERDICT}). Check the run-newman-with-openapi.sh logs and the uploaded artifact."
-              exit 0
+              # distinct CI-infra failure so it is never mistaken for an API regression.
+              echo "::error title=Newman report missing::Newman produced no parseable results JSON — CI/infra failure, not an API regression (verdict=${VERDICT}). Check the run-newman-with-openapi.sh logs and the uploaded artifact."
+              exit 1
               ;;
           esac
 
