@@ -110,17 +110,11 @@ jobs:
           echo "Setting up test database schema..."
           mysql -h 127.0.0.1 -P "$DB_PORT" -u root -ptestpassword stamps_test < scripts/test-schema.sql || echo "No schema file found, skipping..."
 
-      - name: Install Redis CLI
-        run: |
-          echo "Installing Redis CLI..."
-          sudo apt-get update
-          sudo apt-get install -y redis-tools
-
       - name: Verify Redis Connection
         run: |
-          echo "Verifying Redis connection..."
-          redis-cli -h 127.0.0.1 -p "$REDIS_PORT" ping
-          redis-cli -h 127.0.0.1 -p "$REDIS_PORT" info server | head -5
+          echo "Verifying Redis connection via the Redis service image..."
+          docker run --rm --network host redis:7-alpine redis-cli -h 127.0.0.1 -p "$REDIS_PORT" ping
+          docker run --rm --network host redis:7-alpine redis-cli -h 127.0.0.1 -p "$REDIS_PORT" info server | head -5
 
       - name: Cache dependencies
         run: |
