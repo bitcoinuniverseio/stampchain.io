@@ -11,7 +11,7 @@ on:
 
 jobs:
   validate-schema:
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: [self-hosted, Linux, X64, universe]
     timeout-minutes: 5
     
     steps:
