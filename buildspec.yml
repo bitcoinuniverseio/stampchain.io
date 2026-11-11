@@ -50,7 +50,7 @@ phases:
         else
           echo "Could not detect Deno version from Dockerfile, using Docker Hub directly"
         fi
-      - docker build --platform=linux/arm64 -t $ECR_URI/$ECR_REPOSITORY_NAME:latest .
+      - docker build --platform=linux/arm64 --build-arg APP_BUILD_SHA=${APP_BUILD_SHA:-} --build-arg APP_BUILD_CHANNEL=${APP_BUILD_CHANNEL:-unknown} -t $ECR_URI/$ECR_REPOSITORY_NAME:latest .
   post_build:
     commands:
       - echo "Build completed on $(date)"
