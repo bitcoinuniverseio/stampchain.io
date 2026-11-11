@@ -45,9 +45,13 @@ RUN rm -rf node_modules/.deno && \
 # Switch to deno user for build steps
 USER deno
 
+ARG APP_BUILD_SHA=""
+ARG APP_BUILD_CHANNEL="unknown"
+
 # Build steps with all permissions granted and error handling
 # Build Fresh assets and ensure they're available
-RUN DENO_ENV=production deno run --allow-all main.ts build || (echo "Build failed" && exit 1)
+RUN APP_BUILD_SHA="$APP_BUILD_SHA" APP_BUILD_CHANNEL="$APP_BUILD_CHANNEL" deno run -A version-build/generate.mjs && \
+    DENO_ENV=production deno run --allow-all main.ts build || (echo "Build failed" && exit 1)
 
 # Cache dependencies against the committed lockfile. --frozen=true forces deno
 # to fail the build if deno.lock is missing, out-of-date, or any integrity hash

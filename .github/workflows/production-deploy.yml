@@ -120,7 +120,9 @@ jobs:
               {\"name\":\"AWS_ACCOUNT_ID\",\"value\":\"947253282047\"},
               {\"name\":\"AWS_DEFAULT_REGION\",\"value\":\"${{ env.AWS_REGION }}\"},
               {\"name\":\"ECR_REPOSITORY_NAME\",\"value\":\"${{ env.ECR_REPO }}\"},
-              {\"name\":\"VERSION_TAG\",\"value\":\"${{ needs.pre-check.outputs.version_tag }}\"}
+              {\"name\":\"VERSION_TAG\",\"value\":\"${{ needs.pre-check.outputs.version_tag }}\"},
+              {\"name\":\"APP_BUILD_SHA\",\"value\":\"${{ github.sha }}\"},
+              {\"name\":\"APP_BUILD_CHANNEL\",\"value\":\"production\"}
             ]" \
             --query 'build.id' \
             --output text)

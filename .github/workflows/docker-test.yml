@@ -27,6 +27,8 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
+          build-args: |
+            APP_BUILD_SHA=${{ github.sha }}
           load: true
           tags: stamps-app:test
           cache-from: type=gha

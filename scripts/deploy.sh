@@ -369,6 +369,8 @@ build_local() {
   local SMOKE_TAG="${ECR_REPOSITORY}:${SMOKE_TAG_SUFFIX}"
 
   run docker buildx build \
+    --build-arg "APP_BUILD_SHA=$(git -C "${project_dir}" rev-parse HEAD)" \
+    --build-arg "APP_BUILD_CHANNEL=${APP_BUILD_CHANNEL:-unknown}" \
     --platform linux/arm64 \
     --tag "${SMOKE_TAG}" \
     --cache-from "type=registry,ref=${ECR_REPOSITORY}:buildcache" \
