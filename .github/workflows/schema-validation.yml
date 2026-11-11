@@ -19,7 +19,7 @@ env:
 jobs:
   api-schema-validation:
     name: API Schema Validation
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: [self-hosted, Linux, X64, universe]
     timeout-minutes: 25
     permissions:
       contents: read
