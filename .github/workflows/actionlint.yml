@@ -3,6 +3,11 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
 jobs:
   actionlint:
     runs-on: [self-hosted, Linux, X64, universe]
@@ -12,4 +17,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
+          filter_mode: added
 

@@ -5,14 +5,14 @@
 
 &nbsp;
 
-[![Code Quality](https://github.com/stampchain-io/stampchain.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/stampchain-io/stampchain.io/actions/workflows/deploy.yml)&nbsp;&nbsp;
-[![Unit Tests](https://github.com/stampchain-io/stampchain.io/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/stampchain-io/stampchain.io/actions/workflows/unit-tests.yml)&nbsp;&nbsp;
-[![Integration Tests](https://github.com/stampchain-io/stampchain.io/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/stampchain-io/stampchain.io/actions/workflows/integration-tests.yml)&nbsp;&nbsp;
-[![TypeScript Type Checking](https://github.com/stampchain-io/stampchain.io/actions/workflows/type-check.yml/badge.svg)](https://github.com/stampchain-io/stampchain.io/actions/workflows/type-check.yml)
+[![Code Quality](https://github.com/bitcoinuniverseio/stampchain.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/bitcoinuniverseio/stampchain.io/actions/workflows/deploy.yml)&nbsp;&nbsp;
+[![Unit Tests](https://github.com/bitcoinuniverseio/stampchain.io/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/bitcoinuniverseio/stampchain.io/actions/workflows/unit-tests.yml)&nbsp;&nbsp;
+[![Integration Tests](https://github.com/bitcoinuniverseio/stampchain.io/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/bitcoinuniverseio/stampchain.io/actions/workflows/integration-tests.yml)&nbsp;&nbsp;
+[![TypeScript Type Checking](https://github.com/bitcoinuniverseio/stampchain.io/actions/workflows/type-check.yml/badge.svg)](https://github.com/bitcoinuniverseio/stampchain.io/actions/workflows/type-check.yml)
 
-[![Newman API Tests](https://github.com/stampchain-io/stampchain.io/actions/workflows/newman-comprehensive-tests.yml/badge.svg)](https://github.com/stampchain-io/stampchain.io/actions/workflows/newman-comprehensive-tests.yml)&nbsp;&nbsp;
-[![Docker Build Test](https://github.com/stampchain-io/stampchain.io/actions/workflows/docker-test.yml/badge.svg)](https://github.com/stampchain-io/stampchain.io/actions/workflows/docker-test.yml)&nbsp;&nbsp;
-[![Actionlint](https://github.com/stampchain-io/stampchain.io/actions/workflows/actionlint.yml/badge.svg)](https://github.com/stampchain-io/stampchain.io/actions/workflows/actionlint.yml)
+[![Newman API Tests](https://github.com/bitcoinuniverseio/stampchain.io/actions/workflows/newman-comprehensive-tests.yml/badge.svg)](https://github.com/bitcoinuniverseio/stampchain.io/actions/workflows/newman-comprehensive-tests.yml)&nbsp;&nbsp;
+[![Docker Build Test](https://github.com/bitcoinuniverseio/stampchain.io/actions/workflows/docker-test.yml/badge.svg)](https://github.com/bitcoinuniverseio/stampchain.io/actions/workflows/docker-test.yml)&nbsp;&nbsp;
+[![Actionlint](https://github.com/bitcoinuniverseio/stampchain.io/actions/workflows/actionlint.yml/badge.svg)](https://github.com/bitcoinuniverseio/stampchain.io/actions/workflows/actionlint.yml)
 
 &nbsp;
 
@@ -23,10 +23,20 @@
 
 ## 📋 Overview
 
-This is the official API and block explorer for
+This repository is a Bitcoin Universe fork of
+[stampchain-io/stampchain.io](https://github.com/stampchain-io/stampchain.io).
+It contains the API and block explorer for
 [Bitcoin Stamps](https://stampchain.io/). It provides a comprehensive interface
 for exploring Bitcoin Stamps transactions and metadata, working in conjunction
 with the [Bitcoin Stamps Indexer](https://github.com/bitcoinuniverseio/btc_stamps).
+
+The fork uses Bitcoin Universe CI actions and self-hosted runners, and references
+the Bitcoin Universe indexer. Its production deployment workflow is guarded for
+the upstream repository. Scheduled Newman and daily regression workflows still
+target `https://stampchain.io`; their results describe that live service, not a
+deployment of this fork. Review those targets before relying on them as fork
+release checks. The fork has diverged from upstream; these notes are not an
+exhaustive inventory of changes.
 
 ## Documentation
 

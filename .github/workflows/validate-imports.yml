@@ -94,6 +94,7 @@ jobs:
       - name: Upload Validation Results
         uses: actions/upload-artifact@v7
         if: always()
+        continue-on-error: true
         with:
           name: import-validation-results
           path: |
@@ -308,6 +309,7 @@ jobs:
 
       - name: Archive Compliance Report
         uses: actions/upload-artifact@v7
+        continue-on-error: true
         with:
           name: compliance-monitoring-report
           path: compliance-report.json

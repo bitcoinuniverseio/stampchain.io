@@ -361,6 +361,7 @@ jobs:
       - name: Upload comprehensive reports
         if: always()
         uses: actions/upload-artifact@v7
+        continue-on-error: true
         with:
           name: daily-regression-reports-${{ env.TIMESTAMP || 'unknown' }}
           path: |

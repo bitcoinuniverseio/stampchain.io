@@ -45,6 +45,7 @@ jobs:
       - name: Upload validation report
         if: always()
         uses: actions/upload-artifact@v7
+        continue-on-error: true
         with:
           name: production-readiness-report
           path: reports/
@@ -74,6 +75,7 @@ jobs:
 
       - name: Upload benchmark results
         uses: actions/upload-artifact@v7
+        continue-on-error: true
         with:
           name: performance-benchmarks
           path: reports/performance-baselines.json
@@ -147,6 +149,7 @@ jobs:
 
       - name: Upload integration test results
         uses: actions/upload-artifact@v7
+        continue-on-error: true
         with:
           name: cross-module-integration
           path: |
@@ -279,6 +282,7 @@ jobs:
       - name: Upload rollback test results
         if: always()
         uses: actions/upload-artifact@v7
+        continue-on-error: true
         with:
           name: rollback-test-results
           path: reports/rollback-*.json
@@ -363,6 +367,7 @@ jobs:
 
       - name: Upload comprehensive report
         uses: actions/upload-artifact@v7
+        continue-on-error: true
         with:
           name: comprehensive-validation-report
           path: reports/comprehensive/
