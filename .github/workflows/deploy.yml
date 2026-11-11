@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v7
 
       # Setup Node.js (no cache due to gitignored package-lock.json)
-      - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
+      - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@49c5ceb7e97bd33b567513b3135e0eb5525d89e5
       # Manual npm cache based on package.json (since package-lock.json is gitignored)
       - name: Install npm dependencies
         run: npm install # Using npm install since package-lock.json is gitignored due to dev tool conflicts

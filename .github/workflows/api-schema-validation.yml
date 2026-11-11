@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       
-      - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@8e24bc760556caa5ec8c7c497baaad2e9adcc912
+      - uses: bitcoinuniverseio/universe-ci-actions/universe-node-env@49c5ceb7e97bd33b567513b3135e0eb5525d89e5
       - name: Validate OpenAPI Schema
         run: |
           echo "🔍 Validating OpenAPI specification..."
