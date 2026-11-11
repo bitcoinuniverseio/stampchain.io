@@ -211,6 +211,8 @@ jobs:
 
       - name: Upload test reports
         if: always()
+        # Report-only upload: keep the job green when the shared artifact storage quota is full.
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: newman-comprehensive-reports-${{ github.run_number }}
@@ -512,6 +514,8 @@ jobs:
 
       - name: Upload pagination test reports
         if: always()
+        # Report-only upload: keep the job green when the shared artifact storage quota is full.
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: pagination-validation-reports-${{ github.run_number }}
@@ -555,6 +559,8 @@ jobs:
 
       - name: Store performance results
         if: always()
+        # Report-only upload: keep the job green when the shared artifact storage quota is full.
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: performance-benchmark-${{ github.run_number }}
@@ -900,6 +906,8 @@ jobs:
 
       - name: Upload test reports
         if: always()
+        # Report-only upload: keep the job green when the shared artifact storage quota is full.
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: newman-local-dev-reports-${{ github.run_number }}
@@ -908,6 +916,8 @@ jobs:
 
       - name: Upload dev server logs
         if: failure()
+        # Report-only upload: keep the job green when the shared artifact storage quota is full.
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: dev-server-logs-${{ github.run_number }}
@@ -1083,6 +1093,8 @@ jobs:
 
       - name: Upload test results artifact
         if: always()
+        # Report-only upload: keep the job green when the shared artifact storage quota is full.
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: schema-contract-test-results-${{ github.run_number }}

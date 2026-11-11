@@ -362,6 +362,8 @@ jobs:
           deno run --allow-all scripts/deployment/generate-comprehensive-report.ts
 
       - name: Upload comprehensive report
+        # Report-only upload: keep the job green when the shared artifact storage quota is full.
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: comprehensive-validation-report
