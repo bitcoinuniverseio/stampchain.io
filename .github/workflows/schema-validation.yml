@@ -115,6 +115,8 @@ jobs:
 
       - name: Upload Schema Validation Results
         if: always()
+        # Report-only upload: keep the job green when the shared artifact storage quota is full.
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: schema-validation-results
